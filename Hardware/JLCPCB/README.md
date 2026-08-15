@@ -35,12 +35,12 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 
 | | Count | How |
 |---|---|---|
-| **SMT (reflow)** | **58** | in CPL + BOM |
-| **THT (wave soldered)** | **13** | in CPL + BOM |
-| **Placed by JLCPCB** | **71** | — |
-| Fitted by hand | 8 | `SRM_manual_parts.csv` |
+| **SMT (reflow)** | **56** | in CPL + BOM |
+| **THT (wave soldered)** | **14** | in CPL + BOM |
+| **Placed by JLCPCB** | **70** | — |
+| Fitted by hand | 7 | `SRM_manual_parts.csv` |
 | Arduino Nano base | 1 | fitted by owner |
-| DNP (`na` in schematic) | 11 | C5, C6, R13, R14, R17, R18, R20, R24, R26, R27, R28 |
+| DNP (`na` on the Rev A3 schematic) | 13 | C5, C6, D2, D7, D8, R13, R14, R16, R17, R24, R26, R27, R28 |
 | Mounting holes | 4 | HO1–HO4 |
 | **Total footprints** | **95** | |
 
@@ -115,7 +115,7 @@ Because of (2) the CPL origin is genuinely ambiguous, so both are provided:
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | +50/+50 | if JLC's preview shows every part uniformly shifted |
 
 **Check the placement preview before paying.** A wrong origin appears as a
-uniform shift of all 71 parts and takes one click to spot.
+uniform shift of all 70 parts and takes one click to spot.
 
 ---
 
@@ -132,7 +132,7 @@ The Altium-imported footprints do not follow IPC/JLCPCB orientation:
 | `DIO$2F$GF1G` | 0° | 1 | already along X |
 | `TO-220-DPAK-COMBO` | 0° | 5 | DPAK leads point −y = standard TO-252 |
 
-**45 of the 58 SMT parts sit on an 0805/1206-family land pattern.** Exporting
+**41 of the 56 SMT parts sit on an 0805/1206-family land pattern.** Exporting
 rotation naively would have placed every resistor and capacitor 90° out —
 bridged across its pads instead of along them. No standard rotation-correction
 database catches this, because those databases key on KiCad's *standard*
@@ -173,30 +173,35 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 19 line items carry LCSC part numbers. 45 of 71 placements are **Basic**
+All 24 line items carry LCSC part numbers. 43 of 70 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
 |---|---|---|---|---|
-| SMT | C49678 | Basic | 13 | 100nF 50V X7R 0805 |
-| SMT | C17414 | Basic | 19 | 10 kΩ 1% 0805 |
-| SMT | C17673 | Basic | 4 | 4.7 kΩ 1% 0805 |
-| SMT | C17513 | Basic | 4 | 1 kΩ 1% 0805 |
-| SMT | C8545 | Basic | 4 | 2N7002 SOT-23 |
-| SMT | C84256 | Basic | 1 | Red LED 0805 |
-| SMT | C17572 | Extended | 1 | 240 Ω 1% 0805 |
-| SMT | C17382 | Extended | 1 | 1.33 kΩ 1% 0805 |
-| SMT | C17947 | Extended | 1 | 2.2 Ω 1% 1206 |
-| SMT | C73732 | Extended | 1 | Ferrite bead 600 Ω@100 MHz 1206 |
-| SMT | C18207 | Extended | 1 | M4 400 V 1 A SMA |
-| SMT | C3015165 | Extended | 1 | LM317MDT TO-252 (flat) |
-| SMT | C99124 | Extended | 3 | AOD4184A N-ch 40 V TO-252 (flat) |
-| SMT | C5371003 | Extended | 1 | AOD413A P-ch 40 V TO-252-3L (flat) |
-| SMT | C499792 | Extended | 1 | BZX84C15 15 V zener — **derived, see §7** |
-| SMT | C235747 | Extended | 2 | BZX84C33 33 V zener — **derived, see §7** |
-| THT | C106903 | Extended | 4 | 1N4007 DO-41 |
-| THT | C32713268 | Extended | 8 | Pin header 1×2 2.54 mm |
-| THT | C53055674 | Extended | 1 | Pin header 1×4 2.54 mm |
+| SMT | `C17414` | Basic | 18 | 10kR 125mW 1% 0805 |
+| SMT | `C49678` | Basic | 11 | 100nF 50V X7R 0805 |
+| SMT | `C17513` | Basic | 4 | 1kR 125mW 1% 0805 |
+| SMT | `C99124` | Extended | 3 | AOD4184A N-ch 40V 50A 7mR TO-252 |
+| SMT | `C17673` | Basic | 3 | 4.7kR 125mW 1% 0805 |
+| SMT | `C8545` | Basic | 2 | 2N7002 N-ch 60V 115mA SOT-23 |
+| SMT | `C20917` | Basic | 2 | AO3400A N-ch 30V 5.7A SOT-23 |
+| SMT | `C19110` | Extended | 1 | 2.2uF 25V X7R 0805 |
+| SMT | `C106843` | Extended | 1 | 470nF 50V X7R 0805 |
+| SMT | `C18207` | Extended | 1 | M4 400V 1A SMA(DO-214AC) |
+| SMT | `C3015165` | Extended | 1 | LM317MDT adj. regulator TO-252 |
+| SMT | `C73732` | Extended | 1 | Ferrite bead 600R@100MHz 1206 |
+| SMT | `C84256` | Basic | 1 | Red LED 0805 |
+| SMT | `C5371003` | Extended | 1 | AOD413A P-ch 40V 30A 32mR TO-252-3L |
+| SMT | `C17714` | Basic | 1 | 47R 125mW 1% 0805 |
+| SMT | `C17572` | Extended | 1 | 240R 125mW 1% 0805 |
+| SMT | `C17382` | Extended | 1 | 1.33kR 125mW 1% 0805 |
+| SMT | `C17947` | Extended | 1 | 2.2R 250mW 1% 1206 |
+| SMT | `C17506` | Extended | 1 | 18kR 125mW 1% 0805 |
+| SMT | `C17408` | Basic | 1 | 100R 125mW 1% 0805 |
+| THT | `C32713268` | Extended | 8 | Pin header 1x2 2.54mm |
+| THT | `C106903` | Extended | 4 | 1N4007 1000V 1A DO-41 |
+| THT | `C413552` | Extended | 1 | RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified) |
+| THT | `C53055674` | Extended | 1 | Pin header 1x4 2.54mm |
 
 Substitutions:
 
@@ -212,34 +217,66 @@ stock) and the zeners (~600–1,800 each) before ordering.
 
 ---
 
-## 7. Zener values — derived, not measured
+## 7. The KiCad project disagrees with the released schematic
 
-`ALTIUM_VALUE` is literally `???` for D2, D7 and D8 in both the schematic and
-the board, and the schematic PDF has no extractable text. **The openinverter
-thread contains no output-voltage measurements either** — it covers the
-actuator's internals (cycloid gearbox, HAL502 hall sensors, dyno torque), not
-the controller's clamp levels. The "10F" SOT-23 discussed there is a Renesas
-NNCD10F on the *motor's* flex PCB protecting the hall sensors, not on this
-board.
+**The KiCad conversion is stale. `SRM_motor_controller_A3_sch.pdf` (Rev A3,
+20.10.2025) is authoritative and is what this BOM follows.** Comparing all 76
+components gave **16 divergences**:
 
-So these values are calculated from the circuit, and should be confirmed with
-OH2NLT before a production run:
+| Ref | KiCad conversion | Schematic Rev A3 | Why it matters |
+|---|---|---|---|
+| R16 | 10k | **na** | |
+| R18 | na | **10k** | |
+| R20 | na | **1k** | |
+| R22 | 10k | **18k** | |
+| C8 | 100n | **2u2** | ← all five are the J7 brake divider |
+| R5 | 1k | **47R** | changes Q4's gate drive completely |
+| R36 | 4k7 | **100R** | buzzer drive current |
+| C13 | 100n | **470n** | buzzer coupling |
+| Q1, Q8 | SSM3K329R | **2N7002** | KiCad has all four the same part |
+| Q6, Q7 | SSM3K329R | **SSM3K329R** | …the schematic distinguishes them |
+| D2, D7, D8 | `???` | **na** | not the same thing — see below |
+| F1 | Poly Fuse 10A | **Poly Fuse 8A, Littelfuse RGEF800** | |
+| BZ1, IC4 | *(blank)* | AT-1224-TWT-5V-2-R, LM317T | |
 
-**D7 — Q4 gate-source clamp → 15 V.** R4 (4k7) pulls Q4's gate to the rail, R5
-(1k) pulls it down, so V<sub>GS</sub> = V<sub>rail</sub> × 4.7/5.7 = **9.9 V at
-12 V, 13.2 V at 16 V**. IRF9610 and AOD413A are both ±20 V V<sub>GS(max)</sub>.
-15 V clears the working point and stays under the limit. This one is
-well-constrained.
+### The J7 divider is the dangerous one
 
-**D2 / D8 — output clamps → 33 V.** Low-side 2N7002 drains (60 V V<sub>DS</sub>)
-on the "two configurable outputs for relay / lamp / led". The clamp must sit
-above a 16 V rail and below 60 V; 33 V is the conventional pick and is safe for
-either a lamp or a relay coil. Less tightly constrained than D7 — it depends on
-what you hang on J9/J11.
+J7 is labelled **"Brake SW +12V applied"** — 12 V arrives directly on the pin.
+Rev A3 divides it with R22 (18k) over R18 (10k), giving the Nano
+12 × 10/28 = **4.3 V**. Safe.
 
-Phase flyback does **not** pass through these: at 1.35 Ω the phase current is
-~8.9 A, so ½LI² ≈ 174 mJ — far beyond a 350 mW SOT-23. That energy goes through
-D3–D6 (1N4007), consistent with the design.
+Build to the KiCad values instead and R18 is *not fitted at all*, so there is no
+lower leg: the Nano's A2 pin sits at 12 V behind a 10k resistor, held only by its
+internal clamp diode, with no pull-down when the brake is released. That is an
+out-of-spec input that would read unreliably at best.
+
+This is the clearest evidence the conversion predates Rev A3 — J6 and J8 (the
+unconfigured inputs) match perfectly, and only J7, the one actually configured
+for a 12 V source, differs.
+
+### "na" means deliberately unfitted, not unknown
+
+D2, D7 and D8 carry `???` in KiCad but **`na`** on the schematic, next to the
+note *"Relay/Lamp/LED Drivers — Select part values for application"*. They are
+option positions, not gaps in the documentation, so they are now **DNP**.
+
+Earlier revisions of this package fitted derived zener values there. That was
+filling in a blank the designer left open on purpose. When you would want them:
+
+- **D2 / D8** clamp the low-side outputs on J11 and J9. Fit a zener (≈33 V, under
+  the 2N7002's 60 V) only if you drive something inductive like a relay coil. For
+  a lamp or LED, leave empty.
+- **D7** clamps Q4's gate-source. With R5 = 47R (not the 1k the conversion
+  claims), V<sub>GS</sub> tracks the supply almost 1:1 — about 11.9 V on a 12 V
+  rail, but **19.8 V at the top of the schematic's stated 10–20 V input range**,
+  against a ±20 V limit. On a 12 V vehicle it is unnecessary. Fit ≈15 V if you
+  run the supply much above 16 V.
+
+### Everything else checks out
+
+The remaining 60 components match, including all four 1N4004s, the three
+RFP40N10 phase switches, AOD413A for Q4 (which independently confirms §8), and
+every value in the J6 and J8 input blocks.
 
 ---
 
@@ -318,11 +355,11 @@ land confirms the package. The 30 A / 32 mΩ variant is specified rather than th
 
 ---
 
-## 9. Parts fitted by hand (8)
+## 9. Parts fitted by hand (7)
 
 `SRM_manual_parts.csv` — none of these is a judgement call any more; every
 dimension is measured from the board file, so they are ordinary catalogue
-lookups. Only F1 has a genuine open question.
+lookups. F1 has moved into the machine order — the schematic names it outright (§7).
 
 | Ref | Measured footprint | Part | LCSC |
 |---|---|---|---|
@@ -330,7 +367,7 @@ lookups. Only F1 has a genuine open question.
 | C3, C18 | pitch **5.00 mm**, drill 0.9 | 1000 µF 16 V radial, D10 can | `C88751` |
 | J1, J3 | 4P, pitch **3.81 mm**, drill 1.22 | Terminal block, DB2EVC-3.81-4P | `C395697` |
 | J2, J4 | 2P, pitch **3.81 mm**, drill 1.22 | Terminal block, DB2EVM-3.81-2P | `C395685` |
-| F1 | TE5, pitch **5.08 mm**, drill 0.81 | see below — the one open question | — |
+
 
 Three corrections fall out of measuring rather than trusting the schematic text:
 
@@ -346,35 +383,30 @@ Three corrections fall out of measuring rather than trusting the schematic text:
   (GMC1209YB-42R2400) matches footprint pitch, drive method and the tuned
   frequency together.
 
-### F1 — what current does it actually see?
+### F1 — resolved by the schematic, and by the current
 
-The schematic says "Poly Fuse 10A" without stating whether that is a **hold** or
-an **interrupt** rating, and the two readings give completely different parts.
-The measured motor data plus the firmware timing settle it.
+The schematic names it outright: **Littelfuse RGEF800**, 8 A hold. That also
+settles the old "is 10 A the hold or the interrupt rating?" question — the KiCad
+value of "10A" was simply wrong.
 
-F1 sits upstream of Q4, so it carries the whole motor current. The firmware
-alternates **two** phases on and **one** phase on, 4 ms each, six steps per loop:
+The current analysis agrees. F1 sits upstream of Q4 so it carries the whole motor
+current, and the firmware alternates two phases on and one phase on, 4 ms each:
 
-| Step | R | Steady-state I | Reached after 4 ms (τ = 1.2–3.3 ms) |
+| Step | R | Steady-state I | After 4 ms (τ = 1.2–3.3 ms) |
 |---|---|---|---|
-| UV / VW / WU (2 phases) | 0.675 Ω | 17.8 A | 12.6–17.2 A |
-| V / W / U (1 phase) | 1.350 Ω | 8.9 A | 6.3–8.6 A |
+| UV / VW / WU | 0.675 Ω | 17.8 A | 12.6–17.2 A |
+| V / W / U | 1.350 Ω | 8.9 A | 6.3–8.6 A |
 
-- duty-weighted average ≈ **11.3 A**
-- worst-case peak ≈ **17.8 A**
-- duration per park/unpark = 45 × 6 × 4 ms + start = **1.14 s**
+Duty-weighted average ≈ **11.3 A**, peak ≈ **17.8 A**, for **1.14 s** per
+park/unpark. An 8 A-hold device runs at ~1.4× hold for just over a second, which
+is well inside its time-to-trip — so the designer's choice makes sense, and it
+also confirms 10 A could never have been an interrupt rating.
 
-A PPTC with a ~1 A hold current would therefore trip on every single operation.
-**"10 A" can only mean the hold/continuous rating.** Question resolved.
-
-The awkward part is that **no ~10 A-hold PPTC fits a 5.08 mm pitch**: RUEF900
-(9 A hold) needs 10.2 mm, and MF-R1100 (11 A) is out of stock. Physics is against
-it — that hold current needs a large disc and wide leads. So either:
-
-- fit a **10 A TE5 cartridge fuse**, which matches the footprint exactly and is
-  correctly rated for 11 A over 1.14 s (fuses tolerate mild overload for
-  seconds), but is not resettable; or
-- fit **RUEF900** and form its leads from 10.2 mm down to 5.08 mm.
+**RGEF800 is not stocked at JLCPCB.** The BOM uses **RGEF700** (`C413552`) —
+same family, same 5.1 mm pitch, 7 A hold / 11.9 A trip. One step down, so it sits
+at ~1.6× hold during operation instead of ~1.4×. Still far from tripping in
+1.14 s, but if you would rather not narrow that margin, buy an RGEF800 elsewhere
+and hand-fit it.
 
 ### Connector current ratings — worth knowing
 
@@ -400,10 +432,10 @@ header) ×2.
 
 | File | Contents |
 |---|---|
-| `SRM_CPL_JLCPCB.csv` | **CPL — 71 parts (58 SMT + 13 THT), board-lower-left origin** |
+| `SRM_CPL_JLCPCB.csv` | **CPL — 70 parts (56 SMT + 14 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
-| `SRM_BOM_JLCPCB.csv` | 19 line items, all with LCSC part numbers |
-| `SRM_manual_parts.csv` | the 8 parts fitted by hand |
+| `SRM_BOM_JLCPCB.csv` | 24 line items, all with LCSC part numbers |
+| `SRM_manual_parts.csv` | the 7 parts fitted by hand |
 | `SRM_positions_all.csv` | all 95 footprints with status and corrected rotation |
 | `tools/srm_paths.py` | resolves the design files out of the fork's zips |
 | `tools/gen_jlcpcb.py` | generator |

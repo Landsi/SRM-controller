@@ -39,6 +39,28 @@ ROT_CORR = {'TO-220-DPAK-COMBO':0, '0805':90, '1206':90, 'LED_0805':90, 'SOT23':
 # ---- part assignment -------------------------------------------------------
 # key: designator -> (comment, LCSC, library, group)
 #   group: SMT = reflow, THT = wave-soldered by JLCPCB, MANUAL = pick in JLC UI
+# --- Rev A3 schematic overrides ---------------------------------------------
+# The KiCad project is a stale PADS->Altium->KiCad conversion and disagrees with
+# the released schematic (SRM_motor_controller_A3_sch.pdf, Rev A3 / 20.10.2025)
+# on 16 of 76 components. The PDF is authoritative; these are its values.
+# Read off the plotted schematic, cross-checked against the netlist topology.
+REV_A3 = {
+    # J7 "Brake SW +12V applied" — the whole divider chain is different, and the
+    # KiCad values would put ~12 V on a 5 V Nano pin with no lower leg fitted.
+    'R16':'na', 'R18':'10k', 'R20':'1k', 'R22':'18k', 'C8':'2u2',
+    # Q4 gate network: R5 is 47R, not 1k -> Vgs tracks the rail almost 1:1
+    'R5':'47R',
+    # buzzer drive
+    'R36':'100R', 'C13':'470n',
+    # Q1/Q8 really are 2N7002; Q6/Q7 really are SSM3K329R. KiCad has all four the same.
+    'Q1':'2N7002', 'Q8':'2N7002', 'Q6':'SSM3K329R', 'Q7':'SSM3K329R',
+    # the schematic names the fuse outright
+    'F1':'Poly Fuse 8A RGEF800',
+    # marked "na" on the schematic = deliberately unfitted, application-dependent.
+    # KiCad carries "???" for these, which is not the same thing. See README §7.
+    'D2':'na', 'D7':'na', 'D8':'na',
+}
+
 SMT_BY_VALUE = {
     ('100n','0805'):        ('100nF 50V X7R 0805',            'C49678','Basic'),
     ('10k','0805'):         ('10kR 125mW 1% 0805',            'C17414','Basic'),
@@ -46,23 +68,27 @@ SMT_BY_VALUE = {
     ('1k','0805'):          ('1kR 125mW 1% 0805',             'C17513','Basic'),
     ('240R','0805'):        ('240R 125mW 1% 0805',            'C17572','Extended'),
     ('1k33','0805'):        ('1.33kR 125mW 1% 0805',          'C17382','Extended'),
+    ('18k','0805'):         ('18kR 125mW 1% 0805',            'C17506','Extended'),
+    ('47R','0805'):         ('47R 125mW 1% 0805',             'C17714','Basic'),
+    ('100R','0805'):        ('100R 125mW 1% 0805',            'C17408','Basic'),
+    ('2u2','0805'):         ('2.2uF 25V X7R 0805',            'C19110','Extended'),
+    ('470n','0805'):        ('470nF 50V X7R 0805',            'C106843','Extended'),
     ('2R2','1206'):         ('2.2R 250mW 1% 1206',            'C17947','Extended'),
     ('FB 600R','1206'):     ('Ferrite bead 600R@100MHz 1206', 'C73732','Extended'),
     ('GF1G','DIO$2F$GF1G'): ('M4 400V 1A SMA(DO-214AC)',      'C18207','Extended'),
-    ('SSM3K329R','SOT23'):  ('2N7002 N-ch 60V SOT-23',        'C8545', 'Basic'),
+    ('2N7002','SOT23'):     ('2N7002 N-ch 60V 115mA SOT-23',  'C8545', 'Basic'),
+    ('SSM3K329R','SOT23'):  ('AO3400A N-ch 30V 5.7A SOT-23',  'C20917','Basic'),
     ('LED','LED_0805'):     ('Red LED 0805',                  'C84256','Basic'),
 }
-# Zeners: values DERIVED (see README section 7), not recovered from the design.
-ZENERS = {
-    'D7': ('BZX84C15 15V zener SOT-23 (Q4 Vgs clamp)', 'C499792','Extended'),
-    'D2': ('BZX84C33 33V zener SOT-23 (output clamp)', 'C235747','Extended'),
-    'D8': ('BZX84C33 33V zener SOT-23 (output clamp)', 'C235747','Extended'),
-}
+ZENERS = {}   # D2/D7/D8 are "na" on the schematic -> DNP. See README section 7.
 THT = {}
 for r in ('D3','D4','D5','D6'): THT[r] = ('1N4007 1000V 1A DO-41','C106903','Extended')
 for r in ('J5','J6','J7','J8','J9','J10','J11','J12'):
     THT[r] = ('Pin header 1x2 2.54mm','C32713268','Extended')
 THT['J13'] = ('Pin header 1x4 2.54mm','C53055674','Extended')
+# Schematic specifies Littelfuse RGEF800 (8 A hold). Not stocked; RGEF700 is the
+# same family at 5.1 mm pitch, 7 A hold / 11.9 A trip. See README section 9.
+THT['F1'] = ('RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified)','C413552','Extended')
 
 # --- TO-220-DPAK-COMBO: placed as flat SMD (TO-252 / DPAK) -------------------
 # JLCPCB inserts TO-220 packages UPRIGHT, but every one of these positions has a
@@ -98,12 +124,6 @@ MANUAL = {
            'implies a D10 can. 16YXJ1000M10X16 = C88751 (D10x16mm). For a shorter can, '
            'C51934165 (D10x11.5mm polymer).',
     'C18': 'as C3 - 1000uF 16V, 5.00mm pitch, D10 can. C88751.',
-    'F1':  'TE5 radial, pitch 5.08mm, drill 0.81mm (measured). "Poly Fuse 10A" resolved: the '
-           'motor draws ~11A average and ~18A peak for 1.14s per operation, so 10A must be the '
-           'HOLD/continuous rating, not an interrupt rating. BUT no ~10A-hold PPTC fits 5.08mm '
-           '- RUEF900 (9A hold) needs 10.2mm pitch and MF-R1100 (11A) is out of stock. Either '
-           'fit a 10A TE5 cartridge fuse (fits exactly, not resettable) or form RUEF900 leads '
-           'from 10.2mm to 5.08mm. See README section 9.',
     'J1':  'Terminal block 4P, pitch 3.81mm, drill 1.22mm (measured - NOT 5.08mm). Original is '
            'Phoenix MC 1,5/4-G-3,81. DB2EVC-3.81-4P-GN = C395697. This is the MOTOR connector: '
            'pin 1 = common (~18A peak), pins 2-4 = one phase each (~9A). That exceeds the 8A '
@@ -151,6 +171,7 @@ for fp in kids(pcb,'footprint'):
     dx,dy = rot_local(cxl,cyl,rot)
     sp = schprops.get(ref,{})
     value = (sp.get('ALTIUM_VALUE') or pr.get('Value') or '').strip()
+    value = REV_A3.get(ref, value)      # released schematic wins over the conversion
     rec = dict(ref=ref, fpname=fpn, tech=tech, value=value,
                cx=round(fx+dx-OX,4), cy=round(OY-(fy+dy),4),
                rot=round((rot+ROT_CORR.get(fpn,0))%360,2), raw_rot=round(rot%360,2))
