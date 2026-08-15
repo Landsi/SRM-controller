@@ -1,0 +1,10 @@
+Designator,Value,Footprint,Why / what to pick
+BZ1,BUZZ,BUZZ_ROUND,Magnetic buzzer 12mm THT - AT-1224-TWT-5V-2-R is C3812249 but 0 stock; pick an in-stock 12mm equivalent
+C3,1000u,CAE_5MM,"1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit"
+C18,1000u,CAE_5MM,"1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit"
+F1,Poly Fuse 10A,FUSE_TE5,"PPTC polyfuse, TE5 radial. Schematic says ""Poly Fuse 10A"" - confirm hold vs trip rating"
+J1,PHOENIX/MKDS4,PHOENIX$2F$MC4,Terminal block 4P 5.08mm (Phoenix MKDS4 original)
+J2,PHOENIX/MKDS2,PHOENIX$2F$MC2,Terminal block 2P 5.08mm (Phoenix MKDS2 original)
+J3,PHOENIX/MKDS4,PHOENIX$2F$MC4,Terminal block 4P 5.08mm (Phoenix MKDS4 original)
+J4,PHOENIX/MC2,PHOENIX$2F$MC2,"Terminal block 2P (Phoenix MC2 original - check pitch, MC series is 3.5/5.0mm)"
+Q4,AOD413A,TO-220-DPAK-COMBO,"P-channel motor power switch - SEE README section 8. IRF9610 (1.8A) is undersized; intended part is AOD413A 40V DPAK = C115837 (20,740 stock)"
