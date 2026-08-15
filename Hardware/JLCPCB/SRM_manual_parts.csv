@@ -1,14 +1,9 @@
 Designator,Value,Footprint,Why / what to pick
-BZ1,BUZZ,BUZZ_ROUND,Magnetic buzzer 12mm THT - AT-1224-TWT-5V-2-R is C3812249 but 0 stock; pick an in-stock 12mm equivalent
-C3,1000u,CAE_5MM,"1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit"
-C18,1000u,CAE_5MM,"1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit"
-F1,Poly Fuse 10A,FUSE_TE5,"PPTC polyfuse, TE5 radial. Schematic says ""Poly Fuse 10A"" - confirm hold vs trip rating"
-IC4,LM317T,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. LM317T adjustable regulator; LCSC C3014307."
-J1,PHOENIX/MKDS4,PHOENIX$2F$MC4,Terminal block 4P 5.08mm (Phoenix MKDS4 original)
-J2,PHOENIX/MKDS2,PHOENIX$2F$MC2,Terminal block 2P 5.08mm (Phoenix MKDS2 original)
-J3,PHOENIX/MKDS4,PHOENIX$2F$MC4,Terminal block 4P 5.08mm (Phoenix MKDS4 original)
-J4,PHOENIX/MC2,PHOENIX$2F$MC2,"Terminal block 2P (Phoenix MC2 original - check pitch, MC series is 3.5/5.0mm)"
-Q2,RFP40N10,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742."
-Q3,RFP40N10,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742."
-Q4,AOD413A,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. P-channel motor power switch, and the part number itself is contested: IRF9610 (1.8A) is undersized for ~8.9A; ALTIUM_VALUE/RATING/DETAILS all indicate AOD413A 40V DPAK = C115837."
-Q5,RFP40N10,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742."
+BZ1,BUZZ,BUZZ_ROUND,"Electromagnetic transducer, D12mm, pin pitch 6.50mm, drill 0.8mm (measured from footprint). MUST be PASSIVE / externally driven - the firmware generates the tone by toggling the pin at 2.22kHz (CYC 200), so an active buzzer with a built-in driver is wrong. GMC1209YB-42R2400 = C252922 (12mm, 2.4kHz, passive, 6.5mm pitch) matches footprint, drive method and tuned frequency."
+C3,1000u,CAE_5MM,"1000uF 16V radial, pitch 5.00mm, drill 0.9mm (measured). NOTE the schematic DETAILS field says ""D8, pitch 3.5"" - that is stale; the CAE_5MM footprint is 5.0mm, which implies a D10 can. 16YXJ1000M10X16 = C88751 (D10x16mm). For a shorter can, C51934165 (D10x11.5mm polymer)."
+C18,1000u,CAE_5MM,"as C3 - 1000uF 16V, 5.00mm pitch, D10 can. C88751."
+F1,Poly Fuse 10A,FUSE_TE5,"TE5 radial, pitch 5.08mm, drill 0.81mm (measured). ""Poly Fuse 10A"" resolved: the motor draws ~11A average and ~18A peak for 1.14s per operation, so 10A must be the HOLD/continuous rating, not an interrupt rating. BUT no ~10A-hold PPTC fits 5.08mm - RUEF900 (9A hold) needs 10.2mm pitch and MF-R1100 (11A) is out of stock. Either fit a 10A TE5 cartridge fuse (fits exactly, not resettable) or form RUEF900 leads from 10.2mm to 5.08mm. See README section 9."
+J1,PHOENIX/MKDS4,PHOENIX$2F$MC4,"Terminal block 4P, pitch 3.81mm, drill 1.22mm (measured - NOT 5.08mm). Original is Phoenix MC 1,5/4-G-3,81. DB2EVC-3.81-4P-GN = C395697. This is the MOTOR connector: pin 1 = common (~18A peak), pins 2-4 = one phase each (~9A). That exceeds the 8A block rating, but so did the original Phoenix part - see README section 9."
+J2,PHOENIX/MKDS2,PHOENIX$2F$MC2,"Terminal block 2P, pitch 3.81mm, drill 1.22mm. MOTOR SUPPLY input, feeds F1 - carries the full motor current (~11A avg, ~18A peak). DB2EVM-3.81-2P-GN = C395685."
+J3,PHOENIX/MKDS4,PHOENIX$2F$MC4,"Terminal block 4P, pitch 3.81mm, drill 1.22mm. Encoder / signal connector (8V, 2 signals, GND) - low current. DB2EVC-3.81-4P-GN = C395697."
+J4,PHOENIX/MC2,PHOENIX$2F$MC2,"Terminal block 2P, pitch 3.81mm, drill 1.22mm. Controller supply (+BAT) - low current. Same part as J2: C395685."

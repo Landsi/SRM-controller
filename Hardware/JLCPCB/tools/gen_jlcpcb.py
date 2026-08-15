@@ -34,7 +34,7 @@ def props(n):
     return {p[1]: p[2] for p in kids(n,'property')
             if len(p)>=3 and isinstance(p[1],str) and isinstance(p[2],str)}
 
-ROT_CORR = {'0805':90, '1206':90, 'LED_0805':90, 'SOT23':180, 'DIO$2F$GF1G':0}
+ROT_CORR = {'TO-220-DPAK-COMBO':0, '0805':90, '1206':90, 'LED_0805':90, 'SOT23':180, 'DIO$2F$GF1G':0}
 
 # ---- part assignment -------------------------------------------------------
 # key: designator -> (comment, LCSC, library, group)
@@ -64,29 +64,56 @@ for r in ('J5','J6','J7','J8','J9','J10','J11','J12'):
     THT[r] = ('Pin header 1x2 2.54mm','C32713268','Extended')
 THT['J13'] = ('Pin header 1x4 2.54mm','C53055674','Extended')
 
-# Every TO-220-DPAK-COMBO position has a 5.08 mm mounting hole 17.78 mm from
-# the pin row: the package is meant to lie FLAT with its tab bolted down.
-# JLCPCB's THT process inserts TO-220 packages UPRIGHT and does not form leads
-# or fit screws, so all five are fitted by hand. See README section 8.
-_TO220 = ('flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB '
-          'inserts TO-220 upright and will not form leads or fit a screw, so '
-          'this is fitted by hand - see README section 8. ')
+# --- TO-220-DPAK-COMBO: placed as flat SMD (TO-252 / DPAK) -------------------
+# JLCPCB inserts TO-220 packages UPRIGHT, but every one of these positions has a
+# mounting hole 17.78 mm from the pin row, i.e. the package must lie FLAT. The
+# combo footprint's DPAK lands are present in the fabricated copper (verified in
+# art01.pho, 4/4 tab corners on all five), so the parts go down flat as DPAK.
+#
+# Body centre derived from the LEAD lands, not the oversized thermal pour:
+#   lead land centres X = 0.0 / 2.55 / 5.15  -> span centre X = 2.575
+#   outer lead lands end at y = -4.00, body front face just behind at -4.30,
+#   TO-252 body is 6.10 mm long -> centre y = -7.35
+# Cross-check: a DPAK exposed pad starts ~1 mm behind the body front, predicting
+# y = -5.30; the actual thermal land starts at exactly -5.30. Confirmed.
+DPAK_LOCAL = (2.575, -7.350)
+# Leads sit toward local -y = tab-above-leads in the Y-up CPL frame, which is the
+# standard TO-252 0 deg orientation. All five footprints are at rot 0.
+DPAK = {
+    'IC4': ('LM317MDT adj. regulator TO-252',            'C3015165','Extended'),
+    'Q2':  ('AOD4184A N-ch 40V 50A 7mR TO-252',          'C99124',  'Extended'),
+    'Q3':  ('AOD4184A N-ch 40V 50A 7mR TO-252',          'C99124',  'Extended'),
+    'Q5':  ('AOD4184A N-ch 40V 50A 7mR TO-252',          'C99124',  'Extended'),
+    'Q4':  ('AOD413A P-ch 40V 30A 32mR TO-252-3L',       'C5371003','Extended'),
+}
+
 MANUAL = {
-    'BZ1': 'Magnetic buzzer 12mm THT - AT-1224-TWT-5V-2-R is C3812249 but 0 stock; pick an in-stock 12mm equivalent',
-    'C3':  '1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit',
-    'C18': '1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit',
-    'F1':  'PPTC polyfuse, TE5 radial. Schematic says "Poly Fuse 10A" - confirm hold vs trip rating',
-    'J1':  'Terminal block 4P 5.08mm (Phoenix MKDS4 original)',
-    'J3':  'Terminal block 4P 5.08mm (Phoenix MKDS4 original)',
-    'J2':  'Terminal block 2P 5.08mm (Phoenix MKDS2 original)',
-    'J4':  'Terminal block 2P (Phoenix MC2 original - check pitch, MC series is 3.5/5.0mm)',
-    'IC4': _TO220 + 'LM317T adjustable regulator; LCSC C3014307.',
-    'Q2':  _TO220 + 'N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742.',
-    'Q3':  _TO220 + 'N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742.',
-    'Q5':  _TO220 + 'N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742.',
-    'Q4':  _TO220 + 'P-channel motor power switch, and the part number itself is '
-           'contested: IRF9610 (1.8A) is undersized for ~8.9A; ALTIUM_VALUE/RATING/'
-           'DETAILS all indicate AOD413A 40V DPAK = C115837.',
+    'BZ1': 'Electromagnetic transducer, D12mm, pin pitch 6.50mm, drill 0.8mm (measured from '
+           'footprint). MUST be PASSIVE / externally driven - the firmware generates the tone '
+           'by toggling the pin at 2.22kHz (CYC 200), so an active buzzer with a built-in '
+           'driver is wrong. GMC1209YB-42R2400 = C252922 (12mm, 2.4kHz, passive, 6.5mm pitch) '
+           'matches footprint, drive method and tuned frequency.',
+    'C3':  '1000uF 16V radial, pitch 5.00mm, drill 0.9mm (measured). NOTE the schematic DETAILS '
+           'field says "D8, pitch 3.5" - that is stale; the CAE_5MM footprint is 5.0mm, which '
+           'implies a D10 can. 16YXJ1000M10X16 = C88751 (D10x16mm). For a shorter can, '
+           'C51934165 (D10x11.5mm polymer).',
+    'C18': 'as C3 - 1000uF 16V, 5.00mm pitch, D10 can. C88751.',
+    'F1':  'TE5 radial, pitch 5.08mm, drill 0.81mm (measured). "Poly Fuse 10A" resolved: the '
+           'motor draws ~11A average and ~18A peak for 1.14s per operation, so 10A must be the '
+           'HOLD/continuous rating, not an interrupt rating. BUT no ~10A-hold PPTC fits 5.08mm '
+           '- RUEF900 (9A hold) needs 10.2mm pitch and MF-R1100 (11A) is out of stock. Either '
+           'fit a 10A TE5 cartridge fuse (fits exactly, not resettable) or form RUEF900 leads '
+           'from 10.2mm to 5.08mm. See README section 9.',
+    'J1':  'Terminal block 4P, pitch 3.81mm, drill 1.22mm (measured - NOT 5.08mm). Original is '
+           'Phoenix MC 1,5/4-G-3,81. DB2EVC-3.81-4P-GN = C395697. This is the MOTOR connector: '
+           'pin 1 = common (~18A peak), pins 2-4 = one phase each (~9A). That exceeds the 8A '
+           'block rating, but so did the original Phoenix part - see README section 9.',
+    'J3':  'Terminal block 4P, pitch 3.81mm, drill 1.22mm. Encoder / signal connector '
+           '(8V, 2 signals, GND) - low current. DB2EVC-3.81-4P-GN = C395697.',
+    'J2':  'Terminal block 2P, pitch 3.81mm, drill 1.22mm. MOTOR SUPPLY input, feeds F1 - '
+           'carries the full motor current (~11A avg, ~18A peak). DB2EVM-3.81-2P-GN = C395685.',
+    'J4':  'Terminal block 2P, pitch 3.81mm, drill 1.22mm. Controller supply (+BAT) - low '
+           'current. Same part as J2: C395685.',
 }
 # MOD1 (Arduino Nano) -> two 1x15 female socket strips
 NANO_SOCKET = ('Female header 1x15 2.54mm','C25503121','Extended')
@@ -119,6 +146,8 @@ for fp in kids(pcb,'footprint'):
     tech = 'THT' if any(p[1]=='thru_hole' for p in pads) else 'SMD'
     xs=[p[2] for p in pads]; ys=[p[3] for p in pads]
     cxl,cyl = (min(xs)+max(xs))/2, (min(ys)+max(ys))/2
+    if fpn == 'TO-220-DPAK-COMBO':
+        cxl, cyl = DPAK_LOCAL      # TO-252 body centre, see note above
     dx,dy = rot_local(cxl,cyl,rot)
     sp = schprops.get(ref,{})
     value = (sp.get('ALTIUM_VALUE') or pr.get('Value') or '').strip()
@@ -152,6 +181,9 @@ for c in comps:
         status[ref] = 'MANUAL'; continue
     if fpn == 'NANO':
         status[ref] = 'socketed'; continue
+    if ref in DPAK:
+        cm, lc, lb = DPAK[ref]; add(ref, c['cx'], c['cy'], c['rot'], cm, lc, lb, 'SMT')
+        status[ref] = 'SMT'; continue
     if ref in ZENERS:
         cm, lc, lb = ZENERS[ref]; add(ref, c['cx'], c['cy'], c['rot'], cm, lc, lb, 'SMT')
         status[ref] = 'SMT'; continue

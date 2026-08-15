@@ -35,10 +35,10 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 
 | | Count | How |
 |---|---|---|
-| **SMT (reflow)** | **53** | in CPL + BOM |
+| **SMT (reflow)** | **58** | in CPL + BOM |
 | **THT (wave soldered)** | **13** | in CPL + BOM |
-| **Placed by JLCPCB** | **66** | — |
-| Fitted by hand | 13 | `SRM_manual_parts.csv` — incl. all 5 TO-220s, see §8 |
+| **Placed by JLCPCB** | **71** | — |
+| Fitted by hand | 8 | `SRM_manual_parts.csv` |
 | Arduino Nano base | 1 | fitted by owner |
 | DNP (`na` in schematic) | 11 | C5, C6, R13, R14, R17, R18, R20, R24, R26, R27, R28 |
 | Mounting holes | 4 | HO1–HO4 |
@@ -47,8 +47,8 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 [JLCPCB assembles through-hole parts](https://jlcpcb.com/capabilities/pcb-assembly-capabilities)
 by wave soldering, mixed with SMD reflow in a single order, so the axial diodes
 and the pin headers go in the machine order alongside the SMD parts. The five
-TO-220 positions do **not** — JLCPCB inserts those upright and this board needs
-them flat, which is §8.
+combo positions go in too, but as flat **DPAK** parts rather than upright
+TO-220s — that is §8.
 
 ### Upload
 
@@ -115,7 +115,7 @@ Because of (2) the CPL origin is genuinely ambiguous, so both are provided:
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | +50/+50 | if JLC's preview shows every part uniformly shifted |
 
 **Check the placement preview before paying.** A wrong origin appears as a
-uniform shift of all 66 parts and takes one click to spot.
+uniform shift of all 71 parts and takes one click to spot.
 
 ---
 
@@ -130,8 +130,9 @@ The Altium-imported footprints do not follow IPC/JLCPCB orientation:
 | `LED_0805` | **+90°** | 1 | same |
 | `SOT23` | **+180°** | 7 | geometry matches KiCad's standard SOT-23 |
 | `DIO$2F$GF1G` | 0° | 1 | already along X |
+| `TO-220-DPAK-COMBO` | 0° | 5 | DPAK leads point −y = standard TO-252 |
 
-**45 of the 53 SMT parts sit on an 0805/1206-family land pattern.** Exporting
+**45 of the 58 SMT parts sit on an 0805/1206-family land pattern.** Exporting
 rotation naively would have placed every resistor and capacitor 90° out —
 bridged across its pads instead of along them. No standard rotation-correction
 database catches this, because those databases key on KiCad's *standard*
@@ -158,7 +159,7 @@ netlist, identify every transistor:
 
 | Part | Nano pin | Firmware role | Drives |
 |---|---|---|---|
-| Q2, Q3, Q5 (TO-220) | D10/D11/D12 | `U_SW`/`V_SW`/`W_SW` | the three SRM phases |
+| Q2, Q3, Q5 (DPAK) | D10/D11/D12 | `U_SW`/`V_SW`/`W_SW` | the three SRM phases |
 | Q6 → Q4 | D9 | `A_SW` motor power | Q4 = high-side motor switch |
 | Q1 | D5 | `BTNLED` | park-lock button LED, via J11 |
 | Q7 | D6 | *unused in v1.0* — spare output | J9 |
@@ -172,7 +173,7 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 16 line items carry LCSC part numbers. 42 of 66 placements are **Basic**
+All 19 line items carry LCSC part numbers. 45 of 71 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
@@ -188,6 +189,9 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | C17947 | Extended | 1 | 2.2 Ω 1% 1206 |
 | SMT | C73732 | Extended | 1 | Ferrite bead 600 Ω@100 MHz 1206 |
 | SMT | C18207 | Extended | 1 | M4 400 V 1 A SMA |
+| SMT | C3015165 | Extended | 1 | LM317MDT TO-252 (flat) |
+| SMT | C99124 | Extended | 3 | AOD4184A N-ch 40 V TO-252 (flat) |
+| SMT | C5371003 | Extended | 1 | AOD413A P-ch 40 V TO-252-3L (flat) |
 | SMT | C499792 | Extended | 1 | BZX84C15 15 V zener — **derived, see §7** |
 | SMT | C235747 | Extended | 2 | BZX84C33 33 V zener — **derived, see §7** |
 | THT | C106903 | Extended | 4 | 1N4007 DO-41 |
@@ -239,93 +243,151 @@ D3–D6 (1N4007), consistent with the design.
 
 ---
 
-## 8. The five TO-220 positions — all fitted by hand
+## 8. The five combo positions — placed flat as DPAK
 
-IC4, Q2, Q3, Q4 and Q5 sit on the `TO-220-DPAK-COMBO` footprint, a hybrid land
-pattern accepting either a TO-220 through-hole part or a DPAK surface-mount one.
-**None of them is in the machine order.**
+IC4, Q2, Q3, Q4 and Q5 sit on `TO-220-DPAK-COMBO`, a hybrid land pattern taking
+either a TO-220 through-hole part or a DPAK surface-mount one. **All five are
+placed as DPAK, lying flat.**
 
-### They must lie flat, and JLCPCB would stand them up
+### Why not TO-220
 
-Every one of the five has a 5.08 mm mounting hole exactly **17.78 mm** from the
-pin row. That hole only makes sense with the package lying flat and its tab
-bolted down — an upright TO-220 can never reach it.
-
+Every one has a 5.08 mm mounting hole exactly **17.78 mm** from the pin row —
+that hole only makes sense with the package lying flat and its tab bolted down.
 JLCPCB's THT process inserts TO-220 packages **upright**: it will not form leads
-90° and it will not fit a screw. Ordering them therefore produces parts standing
-~15 mm proud with the mounting holes unused and no heatsink path — and once
-wave-soldered upright they can't be bent flat afterwards. This shows up plainly
-in JLC's board preview, which is worth trusting: it renders what they will
-actually build.
+90° or fit a screw. Ordering them that way gives parts standing ~15 mm proud
+with no heatsink path, unbendable once wave-soldered. JLC's board preview shows
+this plainly, and is worth trusting — it renders what they will actually build.
 
-So all five are formed, bolted and soldered by hand:
+### The DPAK lands are real
 
-| Ref | Part | LCSC |
-|---|---|---|
-| IC4 | LM317T adjustable regulator | `C3014307` |
-| Q2, Q3, Q5 | N-channel, BUZ11 / RFP40N10 class — IRF540N (100 V, 33 A) is equal or better on both counts | `C20607742` |
-| Q4 | P-channel — **see below** | contested |
+Checked against the fabricated data, **all five DPAK thermal-tab lands are
+present in the top copper** (`art01.pho`, 4/4 corners each). The lands survived
+the Altium→KiCad import only as unnamed, netless pads — a KiCad artifact, not a
+board one.
 
-### The DPAK alternative is real, if you ever want it
+### Where the body goes — derived, then cross-checked
 
-The DPAK lands survived the Altium→KiCad import as unnamed, netless pads — a
-KiCad artifact only. Checked against the fabricated data, **all five DPAK
-thermal-tab lands are present in the top copper** (`art01.pho`, 4/4 corners on
-each), so the physical board genuinely supports surface-mount parts lying flat,
-reflowed onto a 9.9 × 14.9 mm copper pour. That would be better thermally than an
-unbolted upright TO-220 and fully machine-placeable.
+The thermal pour is 9.9 × 14.9 mm, far larger than the ~6.5 mm package, because
+it doubles as the bolt-down area for a TO-220 tab. So it is useless as a
+placement reference. The **lead lands** are the reliable datum:
 
-The obstacle is only the centroid: that thermal land is far larger than the
-~6.5 mm package body, so the pick-and-place origin cannot be inferred reliably
-from the land alone, and there are open through-holes immediately adjacent to the
-lead lands. Doable, but it needs the position set visually in JLC's Parts
-Placement Editor rather than computed.
+```
+lead land centres, footprint-local X = 0.00 / 2.55 / 5.15  ->  span centre 2.575
+outer lead lands end at            y = -4.00
+TO-252 body front face just behind y = -4.30
+body is 6.10 mm long               ->  centre y = -7.35
+```
 
-### Q4's part number is separately contested
+Independent cross-check: a DPAK's exposed pad starts ~1 mm behind the body front
+face, predicting the thermal land should begin at **y = −5.30**. It begins at
+**exactly −5.30**. The land pattern really was drawn around a true TO-252, so the
+body position is confirmed by geometry rather than assumed.
 
-| Field | Value | Implication |
-|---|---|---|
-| PCB `Value` | IRF9610 | P-ch TO-220 but only **1.8 A** — badly undersized for ~8.9 A |
-| `ALTIUM_VALUE` | AOD413A | P-ch **DPAK**, 40 V, ~19 A — plausible |
-| `RATING` | 40V | matches AOD413A |
-| `DETAILS` | SMD | matches AOD413A |
+Verified after generation — every centroid sits inside its own thermal land, and
+the 6.6 × 6.1 mm body clears the lead lands by 1.8 mm.
 
-Three of four fields point to **AOD413A** (`C115837`, 20,740 in stock), so
-IRF9610 is almost certainly a stale legacy value. Whichever you fit, don't let
-an automatic match choose it.
+**Rotation is 0°.** Leads sit toward local −y, i.e. tab-above-leads in the Y-up
+CPL frame, which is the standard TO-252 orientation. All five footprints are at
+rot 0.
+
+### Parts
+
+| Ref | Part | LCSC | Note |
+|---|---|---|---|
+| IC4 | LM317MDT, TO-252 | `C3015165` | supplies ~8 V rail + hall sensors, well under 100 mA |
+| Q2, Q3, Q5 | AOD4184A N-ch, 40 V, 50 A, 7 mΩ | `C99124` | phase switches, ~8.9 A each → ~0.55 W |
+| Q4 | AOD413A P-ch, 40 V, 30 A, 32 mΩ | `C5371003` | motor power switch, carries the lot |
+
+Two things to weigh, neither blocking:
+
+- **Lead pitch is 2.55 / 2.60 mm on these lands, against 2.286 mm on a real
+  TO-252.** The combo footprint compromised toward the TO-220's 2.54 mm holes.
+  Outer leads therefore sit ~0.15–0.3 mm off their land centres — still well
+  inside 2.1 mm-wide lands, but it is not a textbook DPAK pattern.
+- **40 V parts replace 50 V (BUZ11) / 100 V (RFP40N10) originals.** Phase flyback
+  is clamped to the rail by D3–D6, so working V<sub>DS</sub> is ~13–17 V and 40 V
+  is over 2× that. But the 1N4007s are slow rectifiers, so a brief spike before
+  they conduct is plausible. If you want the original margin back, keep Q2/Q3/Q5
+  as bolted TO-220s and hand-fit just those three.
+
+**Q4's part number was separately contested** and this settles it: the PCB value
+`IRF9610` is 1.8 A, hopeless against ~8.9 A, while `ALTIUM_VALUE`, `RATING` (40V)
+and `DETAILS` (SMD) all point at AOD413A. Three fields against one, and the DPAK
+land confirms the package. The 30 A / 32 mΩ variant is specified rather than the
+12 A one, because Q4 sees the full ~18 A peak.
 
 ---
 
-## 9. Parts fitted by hand (13)
+## 9. Parts fitted by hand (8)
 
-`SRM_manual_parts.csv` — three distinct reasons, worth keeping separate:
+`SRM_manual_parts.csv` — none of these is a judgement call any more; every
+dimension is measured from the board file, so they are ordinary catalogue
+lookups. Only F1 has a genuine open question.
 
-**Wrong orientation from the machine (5)** — see §8. JLCPCB stands TO-220s
-upright; this board needs them flat with the tab bolted.
+| Ref | Measured footprint | Part | LCSC |
+|---|---|---|---|
+| BZ1 | D12 mm, pin pitch **6.50 mm**, drill 0.8 | Electromagnetic transducer, **passive** — see below | `C252922` |
+| C3, C18 | pitch **5.00 mm**, drill 0.9 | 1000 µF 16 V radial, D10 can | `C88751` |
+| J1, J3 | 4P, pitch **3.81 mm**, drill 1.22 | Terminal block, DB2EVC-3.81-4P | `C395697` |
+| J2, J4 | 2P, pitch **3.81 mm**, drill 1.22 | Terminal block, DB2EVM-3.81-2P | `C395685` |
+| F1 | TE5, pitch **5.08 mm**, drill 0.81 | see below — the one open question | — |
 
-| Ref | Part | LCSC |
-|---|---|---|
-| IC4 | LM317T regulator, TO-220 | `C3014307` |
-| Q2, Q3, Q5 | N-channel MOSFET, TO-220 — IRF540N | `C20607742` |
-| Q4 | P-channel MOSFET — part number also contested, §8 | `C115837` (AOD413A) |
+Three corrections fall out of measuring rather than trusting the schematic text:
 
-**Physical fit decides, not the part number (7)** — the footprint constrains
-body size, pitch and lead spacing more tightly than any catalogue search does,
-so pick these against the board and current stock:
+- **The terminal blocks are 3.81 mm pitch, not 5.08 mm.** All four are Phoenix
+  **MC 1,5** series, matching the `PHOENIX/MC2` and `MC4` values — the
+  `PHOENIX/MKDS4` value on J1/J3 is stale.
+- **C3/C18 are 5.00 mm pitch, not 3.5 mm.** The schematic `DETAILS` field says
+  "H12, D8, Pitch 3.5", but the footprint is `CAE_5MM` at 5.00 mm — which implies
+  a **D10** can, not D8. Buying to the schematic text would not fit.
+- **BZ1 must be a passive transducer, not an active buzzer.** The firmware
+  generates the tone itself by toggling the pin at 2.22 kHz (`CYC 200`), so a
+  buzzer with a built-in driver is the wrong device. `C252922`
+  (GMC1209YB-42R2400) matches footprint pitch, drive method and the tuned
+  frequency together.
 
-| Ref | What |
-|---|---|
-| BZ1 | 12 mm magnetic buzzer. The firmware tunes its tone for **PUI AT-1224-TWT-5V-2-R** (`C3812249`), which shows **0 stock** — an equivalent works, but a different resonant frequency will sound wrong at the tuned 2.22 kHz |
-| C3, C18 | 1000 µF 16 V radial, D8 × H12, 3.5 mm pitch |
-| J1, J3 | Terminal block 4P 5.08 mm (Phoenix MKDS4 originally) |
-| J2 | Terminal block 2P 5.08 mm (Phoenix MKDS2) |
-| J4 | Terminal block 2P (Phoenix MC2 — check pitch, MC series is 3.5/5.0 mm) |
+### F1 — what current does it actually see?
 
-**Spec genuinely unresolved (1)**
+The schematic says "Poly Fuse 10A" without stating whether that is a **hold** or
+an **interrupt** rating, and the two readings give completely different parts.
+The measured motor data plus the firmware timing settle it.
 
-| Ref | What |
-|---|---|
-| F1 | PPTC polyfuse, TE5 radial. The schematic says "Poly Fuse 10A" without stating whether that is the **hold** or the **interrupt** rating — a 10 A *hold* PPTC is a physically large part, and the two readings give very different components |
+F1 sits upstream of Q4, so it carries the whole motor current. The firmware
+alternates **two** phases on and **one** phase on, 4 ms each, six steps per loop:
+
+| Step | R | Steady-state I | Reached after 4 ms (τ = 1.2–3.3 ms) |
+|---|---|---|---|
+| UV / VW / WU (2 phases) | 0.675 Ω | 17.8 A | 12.6–17.2 A |
+| V / W / U (1 phase) | 1.350 Ω | 8.9 A | 6.3–8.6 A |
+
+- duty-weighted average ≈ **11.3 A**
+- worst-case peak ≈ **17.8 A**
+- duration per park/unpark = 45 × 6 × 4 ms + start = **1.14 s**
+
+A PPTC with a ~1 A hold current would therefore trip on every single operation.
+**"10 A" can only mean the hold/continuous rating.** Question resolved.
+
+The awkward part is that **no ~10 A-hold PPTC fits a 5.08 mm pitch**: RUEF900
+(9 A hold) needs 10.2 mm, and MF-R1100 (11 A) is out of stock. Physics is against
+it — that hold current needs a large disc and wide leads. So either:
+
+- fit a **10 A TE5 cartridge fuse**, which matches the footprint exactly and is
+  correctly rated for 11 A over 1.14 s (fuses tolerate mild overload for
+  seconds), but is not resettable; or
+- fit **RUEF900** and form its leads from 10.2 mm down to 5.08 mm.
+
+### Connector current ratings — worth knowing
+
+From the netlist, **J1 is the motor connector** (pin 1 = common, pins 2–4 = the
+three phases) and **J2 is the motor supply input** feeding F1. With the currents
+below that means J1 pin 1 and J2 both see **~18 A peak**, against an **8 A**
+rating on 3.81 mm blocks.
+
+That is not a substitution error — the original Phoenix MC 1,5 series is also
+rated 8 A, so the design always ran these connectors over their continuous
+rating. It is workable because conduction is only 1.14 s at a time, but it is
+the tightest-rated part in the motor path and worth watching if anything runs
+hot. J3 (encoder/signals) and J4 (controller supply) carry very little.
 
 **MOD1 (Arduino Nano)** is fitted by the owner. Geometry if you want sockets:
 two 1×15 strips, 2.54 mm pitch, at **(59.000, 68.780)** and **(43.760,
@@ -338,10 +400,10 @@ header) ×2.
 
 | File | Contents |
 |---|---|
-| `SRM_CPL_JLCPCB.csv` | **CPL — 66 parts (53 SMT + 13 THT), board-lower-left origin** |
+| `SRM_CPL_JLCPCB.csv` | **CPL — 71 parts (58 SMT + 13 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
-| `SRM_BOM_JLCPCB.csv` | 16 line items, all with LCSC part numbers |
-| `SRM_manual_parts.csv` | the 13 parts fitted by hand |
+| `SRM_BOM_JLCPCB.csv` | 19 line items, all with LCSC part numbers |
+| `SRM_manual_parts.csv` | the 8 parts fitted by hand |
 | `SRM_positions_all.csv` | all 95 footprints with status and corrected rotation |
 | `tools/srm_paths.py` | resolves the design files out of the fork's zips |
 | `tools/gen_jlcpcb.py` | generator |
