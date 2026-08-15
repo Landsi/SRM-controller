@@ -36,17 +36,19 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 | | Count | How |
 |---|---|---|
 | **SMT (reflow)** | **53** | in CPL + BOM |
-| **THT (wave soldered)** | **17** | in CPL + BOM |
-| **Placed by JLCPCB** | **70** | — |
-| Pick manually in JLC's UI | 9 | `SRM_manual_parts.csv` |
+| **THT (wave soldered)** | **13** | in CPL + BOM |
+| **Placed by JLCPCB** | **66** | — |
+| Fitted by hand | 13 | `SRM_manual_parts.csv` — incl. all 5 TO-220s, see §8 |
 | Arduino Nano base | 1 | fitted by owner |
 | DNP (`na` in schematic) | 11 | C5, C6, R13, R14, R17, R18, R20, R24, R26, R27, R28 |
 | Mounting holes | 4 | HO1–HO4 |
 | **Total footprints** | **95** | |
 
 [JLCPCB assembles through-hole parts](https://jlcpcb.com/capabilities/pcb-assembly-capabilities)
-by wave soldering, mixed with SMD reflow in a single order, so the power
-devices, diodes, regulator and headers all go in the machine order.
+by wave soldering, mixed with SMD reflow in a single order, so the axial diodes
+and the pin headers go in the machine order alongside the SMD parts. The five
+TO-220 positions do **not** — JLCPCB inserts those upright and this board needs
+them flat, which is §8.
 
 ### Upload
 
@@ -113,7 +115,7 @@ Because of (2) the CPL origin is genuinely ambiguous, so both are provided:
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | +50/+50 | if JLC's preview shows every part uniformly shifted |
 
 **Check the placement preview before paying.** A wrong origin appears as a
-uniform shift of all 70 parts and takes one click to spot.
+uniform shift of all 66 parts and takes one click to spot.
 
 ---
 
@@ -170,7 +172,7 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 18 line items carry LCSC part numbers. 42 of 70 placements are **Basic**
+All 16 line items carry LCSC part numbers. 42 of 66 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
@@ -189,8 +191,6 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | C499792 | Extended | 1 | BZX84C15 15 V zener — **derived, see §7** |
 | SMT | C235747 | Extended | 2 | BZX84C33 33 V zener — **derived, see §7** |
 | THT | C106903 | Extended | 4 | 1N4007 DO-41 |
-| THT | C3014307 | Extended | 1 | LM317T TO-220 |
-| THT | C20607742 | Extended | 3 | IRF540N TO-220 |
 | THT | C32713268 | Extended | 8 | Pin header 1×2 2.54 mm |
 | THT | C53055674 | Extended | 1 | Pin header 1×4 2.54 mm |
 
@@ -239,50 +239,93 @@ D3–D6 (1N4007), consistent with the design.
 
 ---
 
-## 8. Q4 — needs your decision
+## 8. The five TO-220 positions — all fitted by hand
 
-Q4 is the high-side switch carrying the full motor current (~8.9 A). The design
-data is contradictory:
+IC4, Q2, Q3, Q4 and Q5 sit on the `TO-220-DPAK-COMBO` footprint, a hybrid land
+pattern accepting either a TO-220 through-hole part or a DPAK surface-mount one.
+**None of them is in the machine order.**
+
+### They must lie flat, and JLCPCB would stand them up
+
+Every one of the five has a 5.08 mm mounting hole exactly **17.78 mm** from the
+pin row. That hole only makes sense with the package lying flat and its tab
+bolted down — an upright TO-220 can never reach it.
+
+JLCPCB's THT process inserts TO-220 packages **upright**: it will not form leads
+90° and it will not fit a screw. Ordering them therefore produces parts standing
+~15 mm proud with the mounting holes unused and no heatsink path — and once
+wave-soldered upright they can't be bent flat afterwards. This shows up plainly
+in JLC's board preview, which is worth trusting: it renders what they will
+actually build.
+
+So all five are formed, bolted and soldered by hand:
+
+| Ref | Part | LCSC |
+|---|---|---|
+| IC4 | LM317T adjustable regulator | `C3014307` |
+| Q2, Q3, Q5 | N-channel, BUZ11 / RFP40N10 class — IRF540N (100 V, 33 A) is equal or better on both counts | `C20607742` |
+| Q4 | P-channel — **see below** | contested |
+
+### The DPAK alternative is real, if you ever want it
+
+The DPAK lands survived the Altium→KiCad import as unnamed, netless pads — a
+KiCad artifact only. Checked against the fabricated data, **all five DPAK
+thermal-tab lands are present in the top copper** (`art01.pho`, 4/4 corners on
+each), so the physical board genuinely supports surface-mount parts lying flat,
+reflowed onto a 9.9 × 14.9 mm copper pour. That would be better thermally than an
+unbolted upright TO-220 and fully machine-placeable.
+
+The obstacle is only the centroid: that thermal land is far larger than the
+~6.5 mm package body, so the pick-and-place origin cannot be inferred reliably
+from the land alone, and there are open through-holes immediately adjacent to the
+lead lands. Doable, but it needs the position set visually in JLC's Parts
+Placement Editor rather than computed.
+
+### Q4's part number is separately contested
 
 | Field | Value | Implication |
 |---|---|---|
-| PCB `Value` | IRF9610 | P-ch TO-220 but only **1.8 A** — badly undersized |
+| PCB `Value` | IRF9610 | P-ch TO-220 but only **1.8 A** — badly undersized for ~8.9 A |
 | `ALTIUM_VALUE` | AOD413A | P-ch **DPAK**, 40 V, ~19 A — plausible |
 | `RATING` | 40V | matches AOD413A |
 | `DETAILS` | SMD | matches AOD413A |
 
-Three of four fields point to **AOD413A**, so IRF9610 is almost certainly a
-stale legacy value. AOD413A is `C115837`, **20,740 in stock**.
-
-The catch is the `TO-220-DPAK-COMBO` footprint, a hybrid land pattern accepting
-either package. Its DPAK lands survived the Altium→KiCad import as **unnamed,
-netless pads** — a KiCad artifact only, since the gerbers came from PADS where
-the footprint was intact. But the DPAK thermal land is 9.9 × 14.9 mm, far larger
-than the ~6.5 mm package body, so the pick-and-place centroid cannot be inferred
-reliably from the land alone, and there are open through-holes immediately
-adjacent to the lead lands.
-
-**Recommendation:** order the other 70 parts now and fit Q4 by hand with an
-AOD413A, or add it in JLC's Parts Placement Editor where you can position it
-visually against the silkscreen. Do not let a guessed centroid place your only
-high-current device.
+Three of four fields point to **AOD413A** (`C115837`, 20,740 in stock), so
+IRF9610 is almost certainly a stale legacy value. Whichever you fit, don't let
+an automatic match choose it.
 
 ---
 
-## 9. Parts to pick in JLC's UI (9)
+## 9. Parts fitted by hand (13)
 
-`SRM_manual_parts.csv` — generic parts where physical fit matters more than an
-exact match, so choose against the footprint and current stock:
+`SRM_manual_parts.csv` — three distinct reasons, worth keeping separate:
+
+**Wrong orientation from the machine (5)** — see §8. JLCPCB stands TO-220s
+upright; this board needs them flat with the tab bolted.
+
+| Ref | Part | LCSC |
+|---|---|---|
+| IC4 | LM317T regulator, TO-220 | `C3014307` |
+| Q2, Q3, Q5 | N-channel MOSFET, TO-220 — IRF540N | `C20607742` |
+| Q4 | P-channel MOSFET — part number also contested, §8 | `C115837` (AOD413A) |
+
+**Physical fit decides, not the part number (7)** — the footprint constrains
+body size, pitch and lead spacing more tightly than any catalogue search does,
+so pick these against the board and current stock:
 
 | Ref | What |
 |---|---|
-| BZ1 | 12 mm magnetic buzzer. The firmware tunes for **PUI AT-1224-TWT-5V-2-R** (`C3812249`) but it shows **0 stock** — pick an in-stock 12 mm equivalent |
+| BZ1 | 12 mm magnetic buzzer. The firmware tunes its tone for **PUI AT-1224-TWT-5V-2-R** (`C3812249`), which shows **0 stock** — an equivalent works, but a different resonant frequency will sound wrong at the tuned 2.22 kHz |
 | C3, C18 | 1000 µF 16 V radial, D8 × H12, 3.5 mm pitch |
-| F1 | PPTC polyfuse, TE5 radial. Schematic says "Poly Fuse 10A" — **confirm whether that is hold or interrupt rating**; a 10 A *hold* PPTC is physically large |
 | J1, J3 | Terminal block 4P 5.08 mm (Phoenix MKDS4 originally) |
 | J2 | Terminal block 2P 5.08 mm (Phoenix MKDS2) |
 | J4 | Terminal block 2P (Phoenix MC2 — check pitch, MC series is 3.5/5.0 mm) |
-| Q4 | see §8 |
+
+**Spec genuinely unresolved (1)**
+
+| Ref | What |
+|---|---|
+| F1 | PPTC polyfuse, TE5 radial. The schematic says "Poly Fuse 10A" without stating whether that is the **hold** or the **interrupt** rating — a 10 A *hold* PPTC is a physically large part, and the two readings give very different components |
 
 **MOD1 (Arduino Nano)** is fitted by the owner. Geometry if you want sockets:
 two 1×15 strips, 2.54 mm pitch, at **(59.000, 68.780)** and **(43.760,
@@ -295,10 +338,10 @@ header) ×2.
 
 | File | Contents |
 |---|---|
-| `SRM_CPL_JLCPCB.csv` | **CPL — 70 parts (53 SMT + 17 THT), board-lower-left origin** |
+| `SRM_CPL_JLCPCB.csv` | **CPL — 66 parts (53 SMT + 13 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
-| `SRM_BOM_JLCPCB.csv` | 18 line items, all with LCSC part numbers |
-| `SRM_manual_parts.csv` | the 9 parts to select in JLC's UI |
+| `SRM_BOM_JLCPCB.csv` | 16 line items, all with LCSC part numbers |
+| `SRM_manual_parts.csv` | the 13 parts fitted by hand |
 | `SRM_positions_all.csv` | all 95 footprints with status and corrected rotation |
 | `tools/srm_paths.py` | resolves the design files out of the fork's zips |
 | `tools/gen_jlcpcb.py` | generator |

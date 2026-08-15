@@ -3,8 +3,12 @@ BZ1,BUZZ,BUZZ_ROUND,Magnetic buzzer 12mm THT - AT-1224-TWT-5V-2-R is C3812249 bu
 C3,1000u,CAE_5MM,"1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit"
 C18,1000u,CAE_5MM,"1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit"
 F1,Poly Fuse 10A,FUSE_TE5,"PPTC polyfuse, TE5 radial. Schematic says ""Poly Fuse 10A"" - confirm hold vs trip rating"
+IC4,LM317T,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. LM317T adjustable regulator; LCSC C3014307."
 J1,PHOENIX/MKDS4,PHOENIX$2F$MC4,Terminal block 4P 5.08mm (Phoenix MKDS4 original)
 J2,PHOENIX/MKDS2,PHOENIX$2F$MC2,Terminal block 2P 5.08mm (Phoenix MKDS2 original)
 J3,PHOENIX/MKDS4,PHOENIX$2F$MC4,Terminal block 4P 5.08mm (Phoenix MKDS4 original)
 J4,PHOENIX/MC2,PHOENIX$2F$MC2,"Terminal block 2P (Phoenix MC2 original - check pitch, MC series is 3.5/5.0mm)"
-Q4,AOD413A,TO-220-DPAK-COMBO,"P-channel motor power switch - SEE README section 8. IRF9610 (1.8A) is undersized; intended part is AOD413A 40V DPAK = C115837 (20,740 stock)"
+Q2,RFP40N10,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742."
+Q3,RFP40N10,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742."
+Q4,AOD413A,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. P-channel motor power switch, and the part number itself is contested: IRF9610 (1.8A) is undersized for ~8.9A; ALTIUM_VALUE/RATING/DETAILS all indicate AOD413A 40V DPAK = C115837."
+Q5,RFP40N10,TO-220-DPAK-COMBO,"flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB inserts TO-220 upright and will not form leads or fit a screw, so this is fitted by hand - see README section 8. N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742."

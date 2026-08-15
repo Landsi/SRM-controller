@@ -60,12 +60,17 @@ ZENERS = {
 }
 THT = {}
 for r in ('D3','D4','D5','D6'): THT[r] = ('1N4007 1000V 1A DO-41','C106903','Extended')
-THT['IC4'] = ('LM317T adj. regulator TO-220','C3014307','Extended')
-for r in ('Q2','Q3','Q5'):      THT[r] = ('IRF540N N-ch 100V 33A TO-220','C20607742','Extended')
 for r in ('J5','J6','J7','J8','J9','J10','J11','J12'):
     THT[r] = ('Pin header 1x2 2.54mm','C32713268','Extended')
 THT['J13'] = ('Pin header 1x4 2.54mm','C53055674','Extended')
 
+# Every TO-220-DPAK-COMBO position has a 5.08 mm mounting hole 17.78 mm from
+# the pin row: the package is meant to lie FLAT with its tab bolted down.
+# JLCPCB's THT process inserts TO-220 packages UPRIGHT and does not form leads
+# or fit screws, so all five are fitted by hand. See README section 8.
+_TO220 = ('flat-mounted TO-220, tab bolted through the 5.08 mm hole. JLCPCB '
+          'inserts TO-220 upright and will not form leads or fit a screw, so '
+          'this is fitted by hand - see README section 8. ')
 MANUAL = {
     'BZ1': 'Magnetic buzzer 12mm THT - AT-1224-TWT-5V-2-R is C3812249 but 0 stock; pick an in-stock 12mm equivalent',
     'C3':  '1000uF 16V radial electrolytic, D8 H12 pitch 3.5mm - pick by physical fit',
@@ -75,8 +80,13 @@ MANUAL = {
     'J3':  'Terminal block 4P 5.08mm (Phoenix MKDS4 original)',
     'J2':  'Terminal block 2P 5.08mm (Phoenix MKDS2 original)',
     'J4':  'Terminal block 2P (Phoenix MC2 original - check pitch, MC series is 3.5/5.0mm)',
-    'Q4':  'P-channel motor power switch - SEE README section 8. IRF9610 (1.8A) is undersized; '
-           'intended part is AOD413A 40V DPAK = C115837 (20,740 stock)',
+    'IC4': _TO220 + 'LM317T adjustable regulator; LCSC C3014307.',
+    'Q2':  _TO220 + 'N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742.',
+    'Q3':  _TO220 + 'N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742.',
+    'Q5':  _TO220 + 'N-channel, BUZ11/RFP40N10 class; IRF540N = LCSC C20607742.',
+    'Q4':  _TO220 + 'P-channel motor power switch, and the part number itself is '
+           'contested: IRF9610 (1.8A) is undersized for ~8.9A; ALTIUM_VALUE/RATING/'
+           'DETAILS all indicate AOD413A 40V DPAK = C115837.',
 }
 # MOD1 (Arduino Nano) -> two 1x15 female socket strips
 NANO_SOCKET = ('Female header 1x15 2.54mm','C25503121','Extended')
