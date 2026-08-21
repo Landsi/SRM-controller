@@ -35,12 +35,12 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 
 | | Count | How |
 |---|---|---|
-| **SMT (reflow)** | **56** | in CPL + BOM |
+| **SMT (reflow)** | **60** | in CPL + BOM |
 | **THT (wave soldered)** | **14** | in CPL + BOM |
-| **Placed by JLCPCB** | **70** | — |
+| **Placed by JLCPCB** | **74** | — |
 | Fitted by hand | 7 | `SRM_manual_parts.csv` |
 | Arduino Nano base | 1 | fitted by owner |
-| DNP (`na` on the Rev A3 schematic) | 13 | C5, C6, D2, D7, D8, R13, R14, R16, R17, R24, R26, R27, R28 |
+| DNP (`na`, left unfitted) | 9 | D2, R13, R14, R16, R17, R24, R26, R27, R28 |
 | Mounting holes | 4 | HO1–HO4 |
 | **Total footprints** | **95** | |
 
@@ -115,7 +115,7 @@ Because of (2) the CPL origin is genuinely ambiguous, so both are provided:
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | +50/+50 | if JLC's preview shows every part uniformly shifted |
 
 **Check the placement preview before paying.** A wrong origin appears as a
-uniform shift of all 70 parts and takes one click to spot.
+uniform shift of all 74 parts and takes one click to spot.
 
 ---
 
@@ -173,21 +173,24 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 24 line items carry LCSC part numbers. 43 of 70 placements are **Basic**
+All 28 line items carry LCSC part numbers. 43 of 74 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
 |---|---|---|---|---|
 | SMT | `C17414` | Basic | 18 | 10kR 125mW 1% 0805 |
 | SMT | `C49678` | Basic | 11 | 100nF 50V X7R 0805 |
-| SMT | `C17513` | Basic | 4 | 1kR 125mW 1% 0805 |
 | SMT | `C99124` | Extended | 3 | AOD4184A N-ch 40V 50A 7mR TO-252 |
 | SMT | `C17673` | Basic | 3 | 4.7kR 125mW 1% 0805 |
+| SMT | `C17513` | Basic | 3 | 1kR 125mW 1% 0805 |
+| SMT | `C282728` | Extended | 2 | 10nF 50V X7R 0805 |
 | SMT | `C8545` | Basic | 2 | 2N7002 N-ch 60V 115mA SOT-23 |
 | SMT | `C20917` | Basic | 2 | AO3400A N-ch 30V 5.7A SOT-23 |
 | SMT | `C19110` | Extended | 1 | 2.2uF 25V X7R 0805 |
 | SMT | `C106843` | Extended | 1 | 470nF 50V X7R 0805 |
 | SMT | `C18207` | Extended | 1 | M4 400V 1A SMA(DO-214AC) |
+| SMT | `C44457` | Extended | 1 | BZX84C16 16V zener SOT-23 |
+| SMT | `C22379474` | Extended | 1 | BZX84C33 33V zener SOT-23 |
 | SMT | `C3015165` | Extended | 1 | LM317MDT adj. regulator TO-252 |
 | SMT | `C73732` | Extended | 1 | Ferrite bead 600R@100MHz 1206 |
 | SMT | `C84256` | Basic | 1 | Red LED 0805 |
@@ -197,6 +200,7 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C17382` | Extended | 1 | 1.33kR 125mW 1% 0805 |
 | SMT | `C17947` | Extended | 1 | 2.2R 250mW 1% 1206 |
 | SMT | `C17506` | Extended | 1 | 18kR 125mW 1% 0805 |
+| SMT | `C17477` | Basic | 1 | 0R jumper 0805 |
 | SMT | `C17408` | Basic | 1 | 100R 125mW 1% 0805 |
 | THT | `C32713268` | Extended | 8 | Pin header 1x2 2.54mm |
 | THT | `C106903` | Extended | 4 | 1N4007 1000V 1A DO-41 |
@@ -428,13 +432,95 @@ header) ×2.
 
 ---
 
-## 10. Files
+## 10. Build options fitted for this vehicle
+
+The schematic leaves several positions `na` **on purpose** — they are option
+positions whose right value depends on the installation, not gaps in the
+documentation (§7). This build fills five of them. Each is a deliberate
+deviation from the as-drawn default, recorded here so it can be undone.
+
+### C5, C6 — encoder filters → **10 nF** (`C282728`)
+
+The firmware fixes the encoder rate: 104 pulses over `45 × 6 × 4 ms` = **96.3 Hz**,
+so a 5.19 ms half-period and **2.60 ms between the A and B edges**. R9/R11 are
+10 k series, R10/R12 the 10 k pull-ups (HAL502 is open-drain), so a rising edge
+sees 20 k.
+
+| C | τ rise | % of half-period | f_c |
+|---|---|---|---|
+| 1 nF | 20 µs | 0.4 % | 8.0 kHz — barely filters |
+| **10 nF** | **200 µs** | **3.9 %** | **796 Hz** |
+| 100 nF | 2 ms | 38.5 % | 80 Hz — **breaks the quadrature decode** |
+
+That last row is *why* the position is `na`: the board's house value of 100 n
+would smear edges across 38 % of a half-period, and `enca()` samples ENCB on A's
+rising edge. Both caps must be the same value so A and B are delayed equally.
+
+Worth having because encoder A sits on **INT0** and false edges corrupt `encctr`,
+which is what the over/under-travel and stall detection rely on — with ~18 A
+switching centimetres away.
+
+### D7 — Q4 gate clamp → **BZX84C16, 16 V** (`C44457`)
+
+R5 = 47R (Rev A3, not the 1k the KiCad conversion claims), so V_GS tracks the
+rail almost 1:1:
+
+| Rail | V_GS | Margin to ±20 V |
+|---|---|---|
+| 12 V | 11.9 V | 8.1 V |
+| 14.4 V charging | 14.3 V | **5.7 V** |
+| 20 V (schematic max) | 19.8 V | 0.2 V |
+
+16 V never conducts below a ~15.5 V rail, so it is electrically invisible in
+normal use. 15 V would be wrong — its 14.25 V lower tolerance conducts at
+charging voltage.
+
+### D8 + R31 — J9 prepared for a 12 V relay
+
+J9 is the spare output: `+BAT —[R31]— J9.1 —(load)— J9.2 — Q7 drain — GND`, with
+Q7's gate on Nano **D6**. Firmware v1.0 never touches D6, and R38 (10 k) holds the
+gate low, so **the output stays off until firmware is added** — a safe default.
+
+Two hardware changes make it relay-ready:
+
+- **R31: 1k → 0R** (`C17477`). This is the one that would have bitten. R31 is the
+  LED current-limit resistor; leave it at 1 k and a relay coil sees **under
+  3.4 V and never pulls in**:
+
+  | Coil | R31 = 1k | R31 = 0R |
+  |---|---|---|
+  | 85 Ω Bosch-style | 0.9 V — no | 12.0 V, 141 mA — pulls in |
+  | 160 Ω | 1.7 V — no | 12.0 V, 75 mA — pulls in |
+  | 400 Ω | 3.4 V — no | 12.0 V, 30 mA — pulls in |
+
+  At 0R, J9.1 becomes a direct +BAT feed.
+- **D8: BZX84C33, 33 V** (`C22379474`) — flyback clamp, cathode to Q7's drain.
+  Sits above the 14.4 V rail so it never conducts normally, and at ~55 % of the
+  2N7002-class V_DS limit. For a 0.3 H coil the clamp is ~4.7 W for 1.28 ms
+  (3.0 mJ) — fine non-repetitive for occasional park-lock use. A continuously
+  cycled relay would want an SMA-package TVS instead.
+
+Q7 is an AO3400A (30 V, 5.7 A), far more than any relay coil needs.
+
+**To add the software later:** mirror the `BTNLED` (D5) writes onto D6 in
+`eval_pstatus()` and `blink_code()`, and add `pinMode(6, OUTPUT)` to `setup()`.
+Until then the relay simply stays de-energised.
+
+### D2 stays DNP
+
+The park-lock button is an LED, so there is no inductance to clamp. R30 remains
+**1 k**, giving (12 − 2)/1k ≈ **10 mA** — change R30, not D2, to suit a different
+LED. Fit D2 (33 V) only if that button ever becomes a relay.
+
+---
+
+## 11. Files
 
 | File | Contents |
 |---|---|
-| `SRM_CPL_JLCPCB.csv` | **CPL — 70 parts (56 SMT + 14 THT), board-lower-left origin** |
+| `SRM_CPL_JLCPCB.csv` | **CPL — 74 parts (60 SMT + 14 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
-| `SRM_BOM_JLCPCB.csv` | 24 line items, all with LCSC part numbers |
+| `SRM_BOM_JLCPCB.csv` | 28 line items, all with LCSC part numbers |
 | `SRM_manual_parts.csv` | the 7 parts fitted by hand |
 | `SRM_positions_all.csv` | all 95 footprints with status and corrected rotation |
 | `tools/srm_paths.py` | resolves the design files out of the fork's zips |
@@ -442,7 +528,7 @@ header) ×2.
 | `tools/verify_transform.py` | 156-point drill match |
 | `tools/verify_gerber_offset.py` | drill↔gerber offset correlation |
 
-## 11. Provenance
+## 12. Provenance
 
 This directory lives in <https://github.com/Landsi/SRM-controller>, a fork of
 `Romukeisari/SRM-controller` (GPL-3.0, HW and SW by OH2NLT). An `upstream`

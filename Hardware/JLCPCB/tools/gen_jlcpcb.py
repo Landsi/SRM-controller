@@ -58,7 +58,25 @@ REV_A3 = {
     'F1':'Poly Fuse 8A RGEF800',
     # marked "na" on the schematic = deliberately unfitted, application-dependent.
     # KiCad carries "???" for these, which is not the same thing. See README §7.
-    'D2':'na', 'D7':'na', 'D8':'na',
+    'D2':'na',
+}
+
+# --- build options chosen for THIS vehicle ----------------------------------
+# The schematic leaves these positions 'na' on purpose; values are picked for a
+# 12 V vehicle install with an LED park-lock button and J9 pre-wired for a relay.
+# Reasoning and the numbers behind each are in README section 12.
+FITTED_OPTIONS = {
+    # encoder A/B noise filters. 10n = 200us rise, 3.9% of the 5.19ms half-period
+    # at the firmware's 96.3 Hz encoder rate. 100n (the board's house value)
+    # would eat 38% and wreck the quadrature decode, which is why it is 'na'.
+    'C5':'10n', 'C6':'10n',
+    # Q4 gate-source clamp. R5=47R makes Vgs track the rail ~1:1, leaving only
+    # 5.7 V margin to the +-20 V limit at 14.4 V charging.
+    'D7':'16V',
+    # J9 spare output, prepared for an automotive 12 V relay coil:
+    'D8':'33V',   # flyback clamp, cathode to Q7 drain
+    'R31':'0R',   # WAS 1k. A 1k series feed drops a relay coil to <3.4 V and it
+                  # never pulls in; 0R makes J9.1 a direct +BAT feed.
 }
 
 SMT_BY_VALUE = {
@@ -79,6 +97,10 @@ SMT_BY_VALUE = {
     ('2N7002','SOT23'):     ('2N7002 N-ch 60V 115mA SOT-23',  'C8545', 'Basic'),
     ('SSM3K329R','SOT23'):  ('AO3400A N-ch 30V 5.7A SOT-23',  'C20917','Basic'),
     ('LED','LED_0805'):     ('Red LED 0805',                  'C84256','Basic'),
+    ('10n','0805'):         ('10nF 50V X7R 0805',             'C282728','Extended'),
+    ('0R','0805'):          ('0R jumper 0805',                'C17477','Basic'),
+    ('16V','SOT23'):        ('BZX84C16 16V zener SOT-23',     'C44457','Extended'),
+    ('33V','SOT23'):        ('BZX84C33 33V zener SOT-23',     'C22379474','Extended'),
 }
 ZENERS = {}   # D2/D7/D8 are "na" on the schematic -> DNP. See README section 7.
 THT = {}
@@ -172,6 +194,7 @@ for fp in kids(pcb,'footprint'):
     sp = schprops.get(ref,{})
     value = (sp.get('ALTIUM_VALUE') or pr.get('Value') or '').strip()
     value = REV_A3.get(ref, value)      # released schematic wins over the conversion
+    value = FITTED_OPTIONS.get(ref, value)   # then this build's option choices
     rec = dict(ref=ref, fpname=fpn, tech=tech, value=value,
                cx=round(fx+dx-OX,4), cy=round(OY-(fy+dy),4),
                rot=round((rot+ROT_CORR.get(fpn,0))%360,2), raw_rot=round(rot%360,2))
