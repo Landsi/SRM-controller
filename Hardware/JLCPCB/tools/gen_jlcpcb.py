@@ -74,9 +74,13 @@ FITTED_OPTIONS = {
     # 5.7 V margin to the +-20 V limit at 14.4 V charging.
     'D7':'16V',
     # J9 spare output, prepared for an automotive 12 V relay coil:
-    'D8':'33V',   # flyback clamp, cathode to Q7 drain
-    'R31':'0R',   # WAS 1k. A 1k series feed drops a relay coil to <3.4 V and it
-                  # never pulls in; 0R makes J9.1 a direct +BAT feed.
+    # Flyback clamp on Q7's drain. Clamps drain-to-GND, so it works wherever the
+    # coil's other end is fed from -- this is the only change a relay needs.
+    'D8':'33V',
+    # R31 is deliberately NOT touched. It is the +BAT feed resistor for J9.1, a
+    # convenience supply pin, not the output. Feed the coil from vehicle +12 V
+    # into J9.2 instead: J9.1 keeps its 12 mA self-limiting, and +BAT is unfused
+    # on this board (F1 protects only the motor path).
 }
 
 SMT_BY_VALUE = {
@@ -98,7 +102,6 @@ SMT_BY_VALUE = {
     ('SSM3K329R','SOT23'):  ('AO3400A N-ch 30V 5.7A SOT-23',  'C20917','Basic'),
     ('LED','LED_0805'):     ('Red LED 0805',                  'C84256','Basic'),
     ('10n','0805'):         ('10nF 50V X7R 0805',             'C282728','Extended'),
-    ('0R','0805'):          ('0R jumper 0805',                'C17477','Basic'),
     ('16V','SOT23'):        ('BZX84C16 16V zener SOT-23',     'C44457','Extended'),
     ('33V','SOT23'):        ('BZX84C33 33V zener SOT-23',     'C22379474','Extended'),
 }

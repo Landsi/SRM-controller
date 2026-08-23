@@ -173,16 +173,16 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 28 line items carry LCSC part numbers. 43 of 74 placements are **Basic**
+All 27 line items carry LCSC part numbers. 43 of 74 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
 |---|---|---|---|---|
 | SMT | `C17414` | Basic | 18 | 10kR 125mW 1% 0805 |
 | SMT | `C49678` | Basic | 11 | 100nF 50V X7R 0805 |
+| SMT | `C17513` | Basic | 4 | 1kR 125mW 1% 0805 |
 | SMT | `C99124` | Extended | 3 | AOD4184A N-ch 40V 50A 7mR TO-252 |
 | SMT | `C17673` | Basic | 3 | 4.7kR 125mW 1% 0805 |
-| SMT | `C17513` | Basic | 3 | 1kR 125mW 1% 0805 |
 | SMT | `C282728` | Extended | 2 | 10nF 50V X7R 0805 |
 | SMT | `C8545` | Basic | 2 | 2N7002 N-ch 60V 115mA SOT-23 |
 | SMT | `C20917` | Basic | 2 | AO3400A N-ch 30V 5.7A SOT-23 |
@@ -200,7 +200,6 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C17382` | Extended | 1 | 1.33kR 125mW 1% 0805 |
 | SMT | `C17947` | Extended | 1 | 2.2R 250mW 1% 1206 |
 | SMT | `C17506` | Extended | 1 | 18kR 125mW 1% 0805 |
-| SMT | `C17477` | Basic | 1 | 0R jumper 0805 |
 | SMT | `C17408` | Basic | 1 | 100R 125mW 1% 0805 |
 | THT | `C32713268` | Extended | 8 | Pin header 1x2 2.54mm |
 | THT | `C106903` | Extended | 4 | 1N4007 1000V 1A DO-41 |
@@ -475,36 +474,53 @@ rail almost 1:1:
 normal use. 15 V would be wrong — its 14.25 V lower tolerance conducts at
 charging voltage.
 
-### D8 + R31 — J9 prepared for a 12 V relay
+### D8 — J9 prepared for a 12 V relay
 
-J9 is the spare output: `+BAT —[R31]— J9.1 —(load)— J9.2 — Q7 drain — GND`, with
-Q7's gate on Nano **D6**. Firmware v1.0 never touches D6, and R38 (10 k) holds the
-gate low, so **the output stays off until firmware is added** — a safe default.
+J9 and J11 are **low-side switches with a convenience supply pin**, not two-pin
+outputs:
 
-Two hardware changes make it relay-ready:
+```
++BAT ──[ R31 1k ]── J9.1        <- a SOURCE pin: +BAT tapped through the resistor
+                    J9.2 ── Q7 drain ── GND      <- the actual output
+```
 
-- **R31: 1k → 0R** (`C17477`). This is the one that would have bitten. R31 is the
-  LED current-limit resistor; leave it at 1 k and a relay coil sees **under
-  3.4 V and never pulls in**:
+**J9.2 is the output** — open-drain to ground. J9.1 is just +BAT brought to the
+same connector so a small load (an LED in a button) can sit across two adjacent
+pins with no separate supply wire.
 
-  | Coil | R31 = 1k | R31 = 0R |
-  |---|---|---|
-  | 85 Ω Bosch-style | 0.9 V — no | 12.0 V, 141 mA — pulls in |
-  | 160 Ω | 1.7 V — no | 12.0 V, 75 mA — pulls in |
-  | 400 Ω | 3.4 V — no | 12.0 V, 30 mA — pulls in |
+Two independent things decide what a load needs, and it is worth keeping them
+apart:
 
-  At 0R, J9.1 becomes a direct +BAT feed.
-- **D8: BZX84C33, 33 V** (`C22379474`) — flyback clamp, cathode to Q7's drain.
-  Sits above the 14.4 V rail so it never conducts normally, and at ~55 % of the
-  2N7002-class V_DS limit. For a 0.3 H coil the clamp is ~4.7 W for 1.28 ms
-  (3.0 mJ) — fine non-repetitive for occasional park-lock use. A continuously
-  cycled relay would want an SMA-package TVS instead.
+| | Job | When it matters |
+|---|---|---|
+| **D8** | clamps the inductive kick when Q7 switches **off** | any coil, however it is wired |
+| **R31** | sets the steady current when the output is **on** | only if the load is fed *through J9.1* |
 
-Q7 is an AO3400A (30 V, 5.7 A), far more than any relay coil needs.
+So the only change a relay actually requires is **D8: BZX84C33, 33 V**
+(`C22379474`), cathode to Q7's drain. It clamps drain-to-ground, so it works
+wherever the coil's other end comes from. Into a 0.3 H coil the clamp is ~4.7 W
+for 1.28 ms (3.0 mJ) — fine non-repetitive for occasional park-lock use; a
+continuously cycled relay would want an SMA-package TVS instead.
 
-**To add the software later:** mirror the `BTNLED` (D5) writes onto D6 in
-`eval_pstatus()` and `blink_code()`, and add `pinMode(6, OUTPUT)` to `setup()`.
-Until then the relay simply stays de-energised.
+**Wire the coil from vehicle +12 V (fused) into J9.2, leaving J9.1 unused.**
+12 V and GND are already at the board, so this costs nothing in harness and
+avoids the alternative below.
+
+### Why R31 is deliberately left at 1k
+
+Feeding the coil through J9.1 instead would require R31 → 0 R, because at 1 k a
+coil sees under 3.4 V and never pulls in (85 Ω coil: 0.9 V). That buys a tidy
+two-wire connection, at a real cost:
+
+- **`+BAT` is unfused on this board.** F1 protects only the motor path, and
+  closing J5 bridges +BAT to the *upstream* side of F1. At 0 R, J9.1 becomes a
+  live unfused terminal and a short is limited only by the vehicle fuse, with Q7
+  (5.7 A) and the 8 A connector in the path. At 1 k it self-limits to 12 mA.
+- J9 could no longer drive a bare LED without an external resistor.
+
+Normal current is a non-issue either way — 141 mA through an 0805 link and an
+8 A connector is nothing. The difference is purely fault behaviour, which is why
+the resistor stays at its as-drawn value.
 
 ### D2 stays DNP
 
@@ -520,7 +536,7 @@ LED. Fit D2 (33 V) only if that button ever becomes a relay.
 |---|---|
 | `SRM_CPL_JLCPCB.csv` | **CPL — 74 parts (60 SMT + 14 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
-| `SRM_BOM_JLCPCB.csv` | 28 line items, all with LCSC part numbers |
+| `SRM_BOM_JLCPCB.csv` | 27 line items, all with LCSC part numbers |
 | `SRM_manual_parts.csv` | the 7 parts fitted by hand |
 | `SRM_positions_all.csv` | all 95 footprints with status and corrected rotation |
 | `tools/srm_paths.py` | resolves the design files out of the fork's zips |
