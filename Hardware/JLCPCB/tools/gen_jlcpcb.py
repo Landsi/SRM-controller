@@ -76,7 +76,11 @@ FITTED_OPTIONS = {
     # J9 spare output, prepared for an automotive 12 V relay coil:
     # Flyback clamp on Q7's drain. Clamps drain-to-GND, so it works wherever the
     # coil's other end is fed from -- this is the only change a relay needs.
-    'D8':'33V',
+    # 24 V, NOT 33 V: Q7 is a 30 V part (SSM3K329R as drawn, AO3400A as built),
+    # so a 33 V clamp sits ABOVE its Vds rating and would never conduct before
+    # the FET avalanched. 24 V clears a 14.4 V rail and leaves 4.4 V of margin.
+    # D2 differs on purpose -- Q1 really is a 60 V 2N7002. See README section 10.
+    'D8':'24V',
     # R31 is deliberately NOT touched. It is the +BAT feed resistor for J9.1, a
     # convenience supply pin, not the output. Feed the coil from vehicle +12 V
     # into J9.2 instead: J9.1 keeps its 12 mA self-limiting, and +BAT is unfused
@@ -103,7 +107,7 @@ SMT_BY_VALUE = {
     ('LED','LED_0805'):     ('Red LED 0805',                  'C84256','Basic'),
     ('10n','0805'):         ('10nF 50V X7R 0805',             'C282728','Extended'),
     ('16V','SOT23'):        ('BZX84C16 16V zener SOT-23',     'C44457','Extended'),
-    ('33V','SOT23'):        ('BZX84C33 33V zener SOT-23',     'C22379474','Extended'),
+    ('24V','SOT23'):        ('BZX84C24 24V zener SOT-23',     'C841152','Extended'),
 }
 ZENERS = {}   # D2/D7/D8 are "na" on the schematic -> DNP. See README section 7.
 THT = {}

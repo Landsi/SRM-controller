@@ -190,7 +190,7 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C106843` | Extended | 1 | 470nF 50V X7R 0805 |
 | SMT | `C18207` | Extended | 1 | M4 400V 1A SMA(DO-214AC) |
 | SMT | `C44457` | Extended | 1 | BZX84C16 16V zener SOT-23 |
-| SMT | `C22379474` | Extended | 1 | BZX84C33 33V zener SOT-23 |
+| SMT | `C841152` | Extended | 1 | BZX84C24 24V zener SOT-23 |
 | SMT | `C3015165` | Extended | 1 | LM317MDT adj. regulator TO-252 |
 | SMT | `C73732` | Extended | 1 | Ferrite bead 600R@100MHz 1206 |
 | SMT | `C84256` | Basic | 1 | Red LED 0805 |
@@ -496,11 +496,31 @@ apart:
 | **D8** | clamps the inductive kick when Q7 switches **off** | any coil, however it is wired |
 | **R31** | sets the steady current when the output is **on** | only if the load is fed *through J9.1* |
 
-So the only change a relay actually requires is **D8: BZX84C33, 33 V**
-(`C22379474`), cathode to Q7's drain. It clamps drain-to-ground, so it works
-wherever the coil's other end comes from. Into a 0.3 H coil the clamp is ~4.7 W
-for 1.28 ms (3.0 mJ) — fine non-repetitive for occasional park-lock use; a
-continuously cycled relay would want an SMA-package TVS instead.
+So the only change a relay actually requires is **D8: BZX84C24, 24 V**
+(`C841152`), cathode to Q7's drain. It clamps drain-to-ground, so it works
+wherever the coil's other end comes from. Into a 0.3 H coil the clamp is ~3.4 W
+for 1.8 ms — fine non-repetitive for occasional park-lock use; a continuously
+cycled relay would want an SMA-package TVS instead.
+
+**Why 24 V and not 33 V — a clamp is sized to the transistor, not the rail.**
+It must sit above the rail so it never conducts, *and* below the FET's V_DS
+rating so it conducts before the FET avalanches:
+
+| Clamp | Band | vs 14.4 V rail | vs Q7 (30 V) | vs Q1 (60 V) |
+|---|---|---|---|---|
+| **24 V** | 22.8–25.6 | clear | **+4.4 V** ✓ | +34.4 V ✓ |
+| 33 V | 31.0–35.0 | clear | **−5.0 V — above rating** | +25.0 V ✓ |
+
+Q7 is a 30 V part — SSM3K329R as drawn, AO3400A as built — so a 33 V clamp would
+sit above its breakdown and never conduct in time. That is protection that does
+nothing. **D2 is a different value on purpose**: Q1 really is a 60 V 2N7002.
+
+The two positions look identical but carry different parts because the designer
+knew J11's load (a ~10 mA button LED, so a jellybean 2N7002) and did not know
+J9's (hence 3.5 A of headroom). The 60 V on Q1 is incidental — it is simply what
+a 2N7002 is, not something the circuit needs. **Note the coupling: these clamp
+values are tied to the specific transistors. Change a FET and re-check its
+clamp.**
 
 **Wire the coil from vehicle +12 V (fused) into J9.2, leaving J9.1 unused.**
 12 V and GND are already at the board, so this costs nothing in harness and
@@ -526,7 +546,13 @@ the resistor stays at its as-drawn value.
 
 The park-lock button is an LED, so there is no inductance to clamp. R30 remains
 **1 k**, giving (12 − 2)/1k ≈ **10 mA** — change R30, not D2, to suit a different
-LED. Fit D2 (33 V) only if that button ever becomes a relay.
+LED. Fit D2 (**33 V**, correct against Q1's 60 V) only if that button ever
+becomes a relay.
+
+Note Q1's limits before repurposing J11: 2N7002 is **115 mA**, so it cannot drive
+even a 1.2 W dash bulb — 100 mA steady with roughly **1 A** cold inrush. A lamp
+or relay on J11 means changing Q1 as well, and then re-checking D2 against the
+new part.
 
 ---
 
