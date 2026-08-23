@@ -124,6 +124,19 @@ THT['J13'] = ('Pin header 1x4 2.54mm','C53055674','Extended')
 # Schematic specifies Littelfuse RGEF800 (8 A hold). Not stocked; RGEF700 is the
 # same family at 5.1 mm pitch, 7 A hold / 11.9 A trip. See README section 9.
 THT['F1'] = ('RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified)','C413552','Extended')
+# Buzzer: MUST be a PASSIVE / externally driven transducer -- the firmware makes
+# the tone by toggling the pin at 2.22 kHz, so an active buzzer with a built-in
+# driver is the wrong device. D12mm, 6.50mm pin pitch (measured).
+THT['BZ1'] = ('Passive transducer 12mm 2.4kHz 6.5mm pitch','C252922','Extended')
+# 1000uF 16V radial, 5.00mm pitch (measured) -> D10 can. The schematic DETAILS
+# field says "D8, pitch 3.5", which is stale and would not fit.
+for r in ('C3','C18'): THT[r] = ('1000uF 16V radial D10x16mm 5mm pitch','C88751','Extended')
+# Terminal blocks: 3.81mm pitch (measured), NOT the 5.08mm the stale PHOENIX/MKDS4
+# value implies. Pluggable board-side headers; mating plugs are crimped by the
+# owner. Note J1 pin 1 and J2 carry ~21 A peak against an 8 A block rating -- the
+# original Phoenix MC 1,5 is rated the same, so this is the design's own limit.
+for r in ('J1','J3'): THT[r] = ('Terminal block 4P 3.81mm pluggable','C395697','Extended')
+for r in ('J2','J4'): THT[r] = ('Terminal block 2P 3.81mm pluggable','C395685','Extended')
 
 # --- TO-220-DPAK-COMBO: placed as flat SMD (TO-252 / DPAK) -------------------
 # JLCPCB inserts TO-220 packages UPRIGHT, but every one of these positions has a
@@ -148,28 +161,7 @@ DPAK = {
     'Q4':  ('AOD413A P-ch 40V 30A 32mR TO-252-3L',       'C5371003','Extended'),
 }
 
-MANUAL = {
-    'BZ1': 'Electromagnetic transducer, D12mm, pin pitch 6.50mm, drill 0.8mm (measured from '
-           'footprint). MUST be PASSIVE / externally driven - the firmware generates the tone '
-           'by toggling the pin at 2.22kHz (CYC 200), so an active buzzer with a built-in '
-           'driver is wrong. GMC1209YB-42R2400 = C252922 (12mm, 2.4kHz, passive, 6.5mm pitch) '
-           'matches footprint, drive method and tuned frequency.',
-    'C3':  '1000uF 16V radial, pitch 5.00mm, drill 0.9mm (measured). NOTE the schematic DETAILS '
-           'field says "D8, pitch 3.5" - that is stale; the CAE_5MM footprint is 5.0mm, which '
-           'implies a D10 can. 16YXJ1000M10X16 = C88751 (D10x16mm). For a shorter can, '
-           'C51934165 (D10x11.5mm polymer).',
-    'C18': 'as C3 - 1000uF 16V, 5.00mm pitch, D10 can. C88751.',
-    'J1':  'Terminal block 4P, pitch 3.81mm, drill 1.22mm (measured - NOT 5.08mm). Original is '
-           'Phoenix MC 1,5/4-G-3,81. DB2EVC-3.81-4P-GN = C395697. This is the MOTOR connector: '
-           'pin 1 = common (~18A peak), pins 2-4 = one phase each (~9A). That exceeds the 8A '
-           'block rating, but so did the original Phoenix part - see README section 9.',
-    'J3':  'Terminal block 4P, pitch 3.81mm, drill 1.22mm. Encoder / signal connector '
-           '(8V, 2 signals, GND) - low current. DB2EVC-3.81-4P-GN = C395697.',
-    'J2':  'Terminal block 2P, pitch 3.81mm, drill 1.22mm. MOTOR SUPPLY input, feeds F1 - '
-           'carries the full motor current (~11A avg, ~18A peak). DB2EVM-3.81-2P-GN = C395685.',
-    'J4':  'Terminal block 2P, pitch 3.81mm, drill 1.22mm. Controller supply (+BAT) - low '
-           'current. Same part as J2: C395685.',
-}
+MANUAL = {}   # nothing left to pick by hand; MOD1 is socketed by the owner
 # MOD1 (Arduino Nano) -> two 1x15 female socket strips
 NANO_SOCKET = ('Female header 1x15 2.54mm','C25503121','Extended')
 

@@ -1,5 +1,7 @@
 Comment,Designator,Quantity,LCSC Part #,JLC Library,Mount
+Passive transducer 12mm 2.4kHz 6.5mm pitch,BZ1,1,C252922,Extended,THT
 100nF 50V X7R 0805,"C1,C2,C4,C7,C9,C10,C11,C12,C16,C17,C21",11,C49678,Basic,SMT
+1000uF 16V radial D10x16mm 5mm pitch,"C3,C18",2,C88751,Extended,THT
 10nF 50V X7R 0805,"C5,C6",2,C282728,Extended,SMT
 2.2uF 25V X7R 0805,C8,1,C19110,Extended,SMT
 470nF 50V X7R 0805,C13,1,C106843,Extended,SMT
@@ -9,6 +11,8 @@ BZX84C24 24V zener SOT-23,"D2,D8",2,C841152,Extended,SMT
 BZX84C16 16V zener SOT-23,D7,1,C44457,Extended,SMT
 RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified),F1,1,C413552,Extended,THT
 LM317MDT adj. regulator TO-252,IC4,1,C3015165,Extended,SMT
+Terminal block 4P 3.81mm pluggable,"J1,J3",2,C395697,Extended,THT
+Terminal block 2P 3.81mm pluggable,"J2,J4",2,C395685,Extended,THT
 Pin header 1x2 2.54mm,"J5,J6,J7,J8,J9,J10,J11,J12",8,C32713268,Extended,THT
 Pin header 1x4 2.54mm,J13,1,C53055674,Extended,THT
 Ferrite bead 600R@100MHz 1206,L1,1,C73732,Extended,SMT

@@ -1,8 +1,1 @@
 Designator,Value,Footprint,Why / what to pick
-BZ1,BUZZ,BUZZ_ROUND,"Electromagnetic transducer, D12mm, pin pitch 6.50mm, drill 0.8mm (measured from footprint). MUST be PASSIVE / externally driven - the firmware generates the tone by toggling the pin at 2.22kHz (CYC 200), so an active buzzer with a built-in driver is wrong. GMC1209YB-42R2400 = C252922 (12mm, 2.4kHz, passive, 6.5mm pitch) matches footprint, drive method and tuned frequency."
-C3,1000u,CAE_5MM,"1000uF 16V radial, pitch 5.00mm, drill 0.9mm (measured). NOTE the schematic DETAILS field says ""D8, pitch 3.5"" - that is stale; the CAE_5MM footprint is 5.0mm, which implies a D10 can. 16YXJ1000M10X16 = C88751 (D10x16mm). For a shorter can, C51934165 (D10x11.5mm polymer)."
-C18,1000u,CAE_5MM,"as C3 - 1000uF 16V, 5.00mm pitch, D10 can. C88751."
-J1,PHOENIX/MKDS4,PHOENIX$2F$MC4,"Terminal block 4P, pitch 3.81mm, drill 1.22mm (measured - NOT 5.08mm). Original is Phoenix MC 1,5/4-G-3,81. DB2EVC-3.81-4P-GN = C395697. This is the MOTOR connector: pin 1 = common (~18A peak), pins 2-4 = one phase each (~9A). That exceeds the 8A block rating, but so did the original Phoenix part - see README section 9."
-J2,PHOENIX/MKDS2,PHOENIX$2F$MC2,"Terminal block 2P, pitch 3.81mm, drill 1.22mm. MOTOR SUPPLY input, feeds F1 - carries the full motor current (~11A avg, ~18A peak). DB2EVM-3.81-2P-GN = C395685."
-J3,PHOENIX/MKDS4,PHOENIX$2F$MC4,"Terminal block 4P, pitch 3.81mm, drill 1.22mm. Encoder / signal connector (8V, 2 signals, GND) - low current. DB2EVC-3.81-4P-GN = C395697."
-J4,PHOENIX/MC2,PHOENIX$2F$MC2,"Terminal block 2P, pitch 3.81mm, drill 1.22mm. Controller supply (+BAT) - low current. Same part as J2: C395685."

@@ -36,9 +36,9 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 | | Count | How |
 |---|---|---|
 | **SMT (reflow)** | **61** | in CPL + BOM |
-| **THT (wave soldered)** | **14** | in CPL + BOM |
-| **Placed by JLCPCB** | **75** | — |
-| Fitted by hand | 7 | `SRM_manual_parts.csv` |
+| **THT (wave soldered)** | **21** | in CPL + BOM |
+| **Placed by JLCPCB** | **82** | — |
+| Fitted by hand | 0 | — |
 | Arduino Nano base | 1 | fitted by owner |
 | DNP (`na`, left unfitted) | 8 | R13, R14, R16, R17, R24, R26, R27, R28 |
 | Mounting holes | 4 | HO1–HO4 |
@@ -115,7 +115,7 @@ Because of (2) the CPL origin is genuinely ambiguous, so both are provided:
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | +50/+50 | if JLC's preview shows every part uniformly shifted |
 
 **Check the placement preview before paying.** A wrong origin appears as a
-uniform shift of all 75 parts and takes one click to spot.
+uniform shift of all 82 parts and takes one click to spot.
 
 ---
 
@@ -173,7 +173,7 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 27 line items carry LCSC part numbers. 43 of 75 placements are **Basic**
+All 31 line items carry LCSC part numbers. 43 of 82 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
@@ -203,6 +203,10 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C17408` | Basic | 1 | 100R 125mW 1% 0805 |
 | THT | `C32713268` | Extended | 8 | Pin header 1x2 2.54mm |
 | THT | `C106903` | Extended | 4 | 1N4007 1000V 1A DO-41 |
+| THT | `C88751` | Extended | 2 | 1000uF 16V radial D10x16mm 5mm pitch |
+| THT | `C395697` | Extended | 2 | Terminal block 4P 3.81mm pluggable |
+| THT | `C395685` | Extended | 2 | Terminal block 2P 3.81mm pluggable |
+| THT | `C252922` | Extended | 1 | Passive transducer 12mm 2.4kHz 6.5mm pitch |
 | THT | `C413552` | Extended | 1 | RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified) |
 | THT | `C53055674` | Extended | 1 | Pin header 1x4 2.54mm |
 
@@ -358,76 +362,59 @@ land confirms the package. The 30 A / 32 mΩ variant is specified rather than th
 
 ---
 
-## 9. Parts fitted by hand (7)
+## 9. Everything is in the machine order except the Nano
 
-`SRM_manual_parts.csv` — none of these is a judgement call any more; every
-dimension is measured from the board file, so they are ordinary catalogue
-lookups. F1 has moved into the machine order — the schematic names it outright (§7).
+**MOD1 (Arduino Nano) is the only part not placed.** It is not a JLCPCB assembly
+part, and you would not want it soldered down in any case. Fit two 1×15 female
+sockets and plug the module in:
 
-| Ref | Measured footprint | Part | LCSC |
+| | Position (CPL frame) | Rotation |
+|---|---|---|
+| strip A | (59.000, 68.780) mm | 270° |
+| strip B | (43.760, 68.780) mm | 270° |
+
+2.54 mm pitch, 15 ways each — `C25503121` ×2.
+
+Earlier revisions of this package left seven more parts for hand fitting on the
+grounds that "physical fit decides". Once the footprints were **measured from the
+board file** rather than guessed, matching catalogue parts existed for all of
+them and that reasoning no longer held:
+
+| Ref | Measured | Part | LCSC |
 |---|---|---|---|
-| BZ1 | D12 mm, pin pitch **6.50 mm**, drill 0.8 | Electromagnetic transducer, **passive** — see below | `C252922` |
-| C3, C18 | pitch **5.00 mm**, drill 0.9 | 1000 µF 16 V radial, D10 can | `C88751` |
-| J1, J3 | 4P, pitch **3.81 mm**, drill 1.22 | Terminal block, DB2EVC-3.81-4P | `C395697` |
-| J2, J4 | 2P, pitch **3.81 mm**, drill 1.22 | Terminal block, DB2EVM-3.81-2P | `C395685` |
+| BZ1 | D12 mm, pitch **6.50**, drill 0.8 | passive transducer, 2.4 kHz | `C252922` |
+| C3, C18 | pitch **5.00**, drill 0.9 | 1000 µF 16 V, D10×16 | `C88751` |
+| J1, J3 | 4P, pitch **3.81**, drill 1.22 | DB2EVC-3.81-4P pluggable | `C395697` |
+| J2, J4 | 2P, pitch **3.81**, drill 1.22 | DB2EVM-3.81-2P pluggable | `C395685` |
 
+Three of those measurements contradicted the schematic text and would have caused
+wrong parts to be bought:
 
-Three corrections fall out of measuring rather than trusting the schematic text:
+- **Terminal blocks are 3.81 mm pitch, not 5.08.** All four are Phoenix **MC 1,5**
+  series; the `PHOENIX/MKDS4` value on J1/J3 is stale.
+- **C3/C18 are 5.00 mm pitch, not 3.5**, so a **D10** can, not the D8 the
+  `DETAILS` field claims.
+- **BZ1 must be a passive transducer.** The firmware makes the tone by toggling
+  the pin at 2.22 kHz, so an active buzzer with a built-in driver is wrong.
 
-- **The terminal blocks are 3.81 mm pitch, not 5.08 mm.** All four are Phoenix
-  **MC 1,5** series, matching the `PHOENIX/MC2` and `MC4` values — the
-  `PHOENIX/MKDS4` value on J1/J3 is stale.
-- **C3/C18 are 5.00 mm pitch, not 3.5 mm.** The schematic `DETAILS` field says
-  "H12, D8, Pitch 3.5", but the footprint is `CAE_5MM` at 5.00 mm — which implies
-  a **D10** can, not D8. Buying to the schematic text would not fit.
-- **BZ1 must be a passive transducer, not an active buzzer.** The firmware
-  generates the tone itself by toggling the pin at 2.22 kHz (`CYC 200`), so a
-  buzzer with a built-in driver is the wrong device. `C252922`
-  (GMC1209YB-42R2400) matches footprint pitch, drive method and the tuned
-  frequency together.
+### Connectors — mating plugs and the Molex question
 
-### F1 — resolved by the schematic, and by the current
+J1–J4 are **pluggable board-side headers**; the mating plugs are crimped
+separately.
 
-The schematic names it outright: **Littelfuse RGEF800**, 8 A hold. That also
-settles the old "is 10 A the hold or the interrupt rating?" question — the KiCad
-value of "10A" was simply wrong.
+**Molex Mini-Fit Jr. does not fit these footprints.** It is 4.20 mm pitch against
+the board's 3.81 mm, and the error accumulates:
 
-The current analysis agrees. F1 sits upstream of Q4 so it carries the whole motor
-current, and the firmware alternates two phases on and one phase on, 4 ms each:
+| | Pitch | 4-pin span | Outer pin offset | Play in a 1.22 mm hole |
+|---|---|---|---|---|
+| board | 3.81 mm | 11.43 mm | — | ±0.11 mm |
+| Mini-Fit Jr. | 4.20 mm | 12.60 mm | **0.585 mm** | misses by ~0.49 mm |
+| Micro-Fit 3.0 | 3.00 mm | 9.00 mm | 1.215 mm | hopeless |
 
-| Step | R | Steady-state I | After 4 ms (τ = 1.2–3.3 ms) |
-|---|---|---|---|
-| UV / VW / WU | 0.675 Ω | 17.8 A | 12.6–17.2 A |
-| V / W / U | 1.350 Ω | 8.9 A | 6.3–8.6 A |
-
-Duty-weighted average ≈ **11.3 A**, peak ≈ **17.8 A**, for **1.14 s** per
-park/unpark. An 8 A-hold device runs at ~1.4× hold for just over a second, which
-is well inside its time-to-trip — so the designer's choice makes sense, and it
-also confirms 10 A could never have been an interrupt rating.
-
-**RGEF800 is not stocked at JLCPCB.** The BOM uses **RGEF700** (`C413552`) —
-same family, same 5.1 mm pitch, 7 A hold / 11.9 A trip. One step down, so it sits
-at ~1.6× hold during operation instead of ~1.4×. Still far from tripping in
-1.14 s, but if you would rather not narrow that margin, buy an RGEF800 elsewhere
-and hand-fit it.
-
-### Connector current ratings — worth knowing
-
-From the netlist, **J1 is the motor connector** (pin 1 = common, pins 2–4 = the
-three phases) and **J2 is the motor supply input** feeding F1. With the currents
-below that means J1 pin 1 and J2 both see **~18 A peak**, against an **8 A**
-rating on 3.81 mm blocks.
-
-That is not a substitution error — the original Phoenix MC 1,5 series is also
-rated 8 A, so the design always ran these connectors over their continuous
-rating. It is workable because conduction is only 1.14 s at a time, but it is
-the tightest-rated part in the motor path and worth watching if anything runs
-hot. J3 (encoder/signals) and J4 (controller supply) carry very little.
-
-**MOD1 (Arduino Nano)** is fitted by the owner. Geometry if you want sockets:
-two 1×15 strips, 2.54 mm pitch, at **(59.000, 68.780)** and **(43.760,
-68.780)** mm, rotation 270°. A suitable part is `C25503121` (1×15 female
-header) ×2.
+Mini-Fit Jr. is rated **9 A per contact**, better than these 8 A blocks, so it is
+worth using — as an **inline connector on a short pigtail** from the board's
+terminal block, rather than on the board itself. That also puts the better
+contacts on the 21 A motor conductors.
 
 ---
 
@@ -589,10 +576,10 @@ clamps are 24 V. Fit a different FET and re-check its clamp.
 
 | File | Contents |
 |---|---|
-| `SRM_CPL_JLCPCB.csv` | **CPL — 75 parts (61 SMT + 14 THT), board-lower-left origin** |
+| `SRM_CPL_JLCPCB.csv` | **CPL — 82 parts (61 SMT + 21 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
-| `SRM_BOM_JLCPCB.csv` | 27 line items, all with LCSC part numbers |
-| `SRM_manual_parts.csv` | the 7 parts fitted by hand |
+| `SRM_BOM_JLCPCB.csv` | 31 line items, all with LCSC part numbers |
+| `SRM_manual_parts.csv` | now empty — nothing is hand-fitted except MOD1 |
 | `SRM_positions_all.csv` | all 95 footprints with status and corrected rotation |
 | `tools/srm_paths.py` | resolves the design files out of the fork's zips |
 | `tools/gen_jlcpcb.py` | generator |
