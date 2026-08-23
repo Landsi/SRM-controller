@@ -76,11 +76,17 @@ FITTED_OPTIONS = {
     # J9 spare output, prepared for an automotive 12 V relay coil:
     # Flyback clamp on Q7's drain. Clamps drain-to-GND, so it works wherever the
     # coil's other end is fed from -- this is the only change a relay needs.
-    # 24 V, NOT 33 V: Q7 is a 30 V part (SSM3K329R as drawn, AO3400A as built),
-    # so a 33 V clamp sits ABOVE its Vds rating and would never conduct before
-    # the FET avalanched. 24 V clears a 14.4 V rail and leaves 4.4 V of margin.
-    # D2 differs on purpose -- Q1 really is a 60 V 2N7002. See README section 10.
-    'D8':'24V',
+    # 24 V, NOT 33 V: these FETs are 30 V parts, so a 33 V clamp sits ABOVE the
+    # Vds rating and would never conduct before the FET avalanched. 24 V clears
+    # a 14.4 V rail and leaves 4.4 V of margin. See README section 10.
+    'D8':'24V', 'D2':'24V',
+    # Both output drivers upgraded to AO3400A so J9 and J11 are interchangeable.
+    # The schematic uses a 2N7002 on Q1 because it knew that load was a ~10 mA
+    # button LED; at 115 mA it cannot drive even a 1.2 W dash bulb. 60 V is not
+    # needed anywhere here -- the rail is 12-14.4 V and D2/D8 clamp at 25.6 V
+    # worst case. Q6/Q7 were already AO3400A (SSM3K329R is SOT-23F, not the
+    # standard SOT-23 this footprint expects).
+    'Q1':'AO3400A', 'Q6':'AO3400A', 'Q7':'AO3400A',
     # R31 is deliberately NOT touched. It is the +BAT feed resistor for J9.1, a
     # convenience supply pin, not the output. Feed the coil from vehicle +12 V
     # into J9.2 instead: J9.1 keeps its 12 mA self-limiting, and +BAT is unfused
@@ -103,7 +109,7 @@ SMT_BY_VALUE = {
     ('FB 600R','1206'):     ('Ferrite bead 600R@100MHz 1206', 'C73732','Extended'),
     ('GF1G','DIO$2F$GF1G'): ('M4 400V 1A SMA(DO-214AC)',      'C18207','Extended'),
     ('2N7002','SOT23'):     ('2N7002 N-ch 60V 115mA SOT-23',  'C8545', 'Basic'),
-    ('SSM3K329R','SOT23'):  ('AO3400A N-ch 30V 5.7A SOT-23',  'C20917','Basic'),
+    ('AO3400A','SOT23'):    ('AO3400A N-ch 30V 5.7A SOT-23',  'C20917','Basic'),
     ('LED','LED_0805'):     ('Red LED 0805',                  'C84256','Basic'),
     ('10n','0805'):         ('10nF 50V X7R 0805',             'C282728','Extended'),
     ('16V','SOT23'):        ('BZX84C16 16V zener SOT-23',     'C44457','Extended'),

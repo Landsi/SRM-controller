@@ -35,12 +35,12 @@ by hand. Set `$SRM_REPO` only if you move these tools out of the repo.
 
 | | Count | How |
 |---|---|---|
-| **SMT (reflow)** | **60** | in CPL + BOM |
+| **SMT (reflow)** | **61** | in CPL + BOM |
 | **THT (wave soldered)** | **14** | in CPL + BOM |
-| **Placed by JLCPCB** | **74** | — |
+| **Placed by JLCPCB** | **75** | — |
 | Fitted by hand | 7 | `SRM_manual_parts.csv` |
 | Arduino Nano base | 1 | fitted by owner |
-| DNP (`na`, left unfitted) | 9 | D2, R13, R14, R16, R17, R24, R26, R27, R28 |
+| DNP (`na`, left unfitted) | 8 | R13, R14, R16, R17, R24, R26, R27, R28 |
 | Mounting holes | 4 | HO1–HO4 |
 | **Total footprints** | **95** | |
 
@@ -115,7 +115,7 @@ Because of (2) the CPL origin is genuinely ambiguous, so both are provided:
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | +50/+50 | if JLC's preview shows every part uniformly shifted |
 
 **Check the placement preview before paying.** A wrong origin appears as a
-uniform shift of all 74 parts and takes one click to spot.
+uniform shift of all 75 parts and takes one click to spot.
 
 ---
 
@@ -173,7 +173,7 @@ encoder pulses end-to-end, ~30–35° travel, runs on **12 V**.
 
 ## 6. BOM
 
-All 27 line items carry LCSC part numbers. 43 of 74 placements are **Basic**
+All 27 line items carry LCSC part numbers. 43 of 75 placements are **Basic**
 parts, so only a handful of feeder setup fees apply.
 
 | Mount | LCSC | Lib | Qty | Part |
@@ -181,20 +181,20 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C17414` | Basic | 18 | 10kR 125mW 1% 0805 |
 | SMT | `C49678` | Basic | 11 | 100nF 50V X7R 0805 |
 | SMT | `C17513` | Basic | 4 | 1kR 125mW 1% 0805 |
+| SMT | `C20917` | Basic | 3 | AO3400A N-ch 30V 5.7A SOT-23 |
 | SMT | `C99124` | Extended | 3 | AOD4184A N-ch 40V 50A 7mR TO-252 |
 | SMT | `C17673` | Basic | 3 | 4.7kR 125mW 1% 0805 |
 | SMT | `C282728` | Extended | 2 | 10nF 50V X7R 0805 |
-| SMT | `C8545` | Basic | 2 | 2N7002 N-ch 60V 115mA SOT-23 |
-| SMT | `C20917` | Basic | 2 | AO3400A N-ch 30V 5.7A SOT-23 |
+| SMT | `C841152` | Extended | 2 | BZX84C24 24V zener SOT-23 |
 | SMT | `C19110` | Extended | 1 | 2.2uF 25V X7R 0805 |
 | SMT | `C106843` | Extended | 1 | 470nF 50V X7R 0805 |
 | SMT | `C18207` | Extended | 1 | M4 400V 1A SMA(DO-214AC) |
 | SMT | `C44457` | Extended | 1 | BZX84C16 16V zener SOT-23 |
-| SMT | `C841152` | Extended | 1 | BZX84C24 24V zener SOT-23 |
 | SMT | `C3015165` | Extended | 1 | LM317MDT adj. regulator TO-252 |
 | SMT | `C73732` | Extended | 1 | Ferrite bead 600R@100MHz 1206 |
 | SMT | `C84256` | Basic | 1 | Red LED 0805 |
 | SMT | `C5371003` | Extended | 1 | AOD413A P-ch 40V 30A 32mR TO-252-3L |
+| SMT | `C8545` | Basic | 1 | 2N7002 N-ch 60V 115mA SOT-23 |
 | SMT | `C17714` | Basic | 1 | 47R 125mW 1% 0805 |
 | SMT | `C17572` | Extended | 1 | 240R 125mW 1% 0805 |
 | SMT | `C17382` | Extended | 1 | 1.33kR 125mW 1% 0805 |
@@ -542,17 +542,46 @@ Normal current is a non-issue either way — 141 mA through an 0805 link and an
 8 A connector is nothing. The difference is purely fault behaviour, which is why
 the resistor stays at its as-drawn value.
 
-### D2 stays DNP
+### D2 fitted too — both channels made identical
 
-The park-lock button is an LED, so there is no inductance to clamp. R30 remains
-**1 k**, giving (12 − 2)/1k ≈ **10 mA** — change R30, not D2, to suit a different
-LED. Fit D2 (**33 V**, correct against Q1's 60 V) only if that button ever
-becomes a relay.
+J9 and J11 are now the same circuit with the same parts, so either can drive an
+LED, a lamp or a relay without rework:
 
-Note Q1's limits before repurposing J11: 2N7002 is **115 mA**, so it cannot drive
-even a 1.2 W dash bulb — 100 mA steady with roughly **1 A** cold inrush. A lamp
-or relay on J11 means changing Q1 as well, and then re-checking D2 against the
-new part.
+| | J11 (park indicator) | J9 (spare) |
+|---|---|---|
+| Driver | **AO3400A** 30 V / 5.7 A | **AO3400A** 30 V / 5.7 A |
+| Clamp | **D2 = BZX84C24, 24 V** | **D8 = BZX84C24, 24 V** |
+| Feed resistor | R30 = 1 k | R31 = 1 k |
+
+Two deviations from the schematic, both deliberate:
+
+**Q1: 2N7002 → AO3400A.** The schematic uses a jellybean 2N7002 because it knew
+J11's load was a ~10 mA button LED. At **115 mA** that part cannot drive even a
+1.2 W dash bulb — 100 mA steady with ~1 A cold inrush. **60 V is not needed
+anywhere on this board**: the rail is 12–14.4 V and the clamps hold the drain to
+25.6 V worst case, so trading it for 5.7 A costs nothing real.
+
+The button LED is unaffected — R30 sets the current, the FET is just a switch:
+
+| | LED current @12 V | @14.4 V | FET drop |
+|---|---|---|---|
+| 2N7002 (7 Ω) | 9.93 mA | 12.31 mA | 69.5 mV |
+| AO3400A (30 mΩ) | 10.00 mA | 12.40 mA | 0.3 mV |
+
+Gate drive is fine (Nano 5 V against V_GS(th) 1.45 V max, R_DS specified at
+2.5 V), R39's 10 k pulldown still holds it off, and off-state leakage of ~1 µA is
+three orders below the ~1 mA an LED needs to glow faintly.
+
+**D2 fitted at 24 V.** Not needed for an LED — a diode has no inductance — but it
+is free, invisible in normal operation (22.8 V lower tolerance against a 14.4 V
+rail), and means J11 is ready for a relay or lamp without touching the board.
+
+To repurpose either output now, the only change is the feed: leave R30/R31 at
+1 k and put the LED across pins 1 and 2, or feed a lamp/relay coil from vehicle
++12 V into pin 2 and leave pin 1 unused.
+
+**The clamp values remain tied to the transistors.** Both are 30 V parts, so both
+clamps are 24 V. Fit a different FET and re-check its clamp.
 
 ---
 
@@ -560,7 +589,7 @@ new part.
 
 | File | Contents |
 |---|---|
-| `SRM_CPL_JLCPCB.csv` | **CPL — 74 parts (60 SMT + 14 THT), board-lower-left origin** |
+| `SRM_CPL_JLCPCB.csv` | **CPL — 75 parts (61 SMT + 14 THT), board-lower-left origin** |
 | `SRM_CPL_JLCPCB_gerber-origin.csv` | same, +50/+50 to match the `.pho` frame |
 | `SRM_BOM_JLCPCB.csv` | 27 line items, all with LCSC part numbers |
 | `SRM_manual_parts.csv` | the 7 parts fitted by hand |
