@@ -121,9 +121,14 @@ for r in ('D3','D4','D5','D6'): THT[r] = ('1N4007 1000V 1A DO-41','C106903','Ext
 for r in ('J5','J6','J7','J8','J9','J10','J11','J12'):
     THT[r] = ('Pin header 1x2 2.54mm','C32713268','Extended')
 THT['J13'] = ('Pin header 1x4 2.54mm','C53055674','Extended')
-# Schematic specifies Littelfuse RGEF800 (8 A hold). Not stocked; RGEF700 is the
-# same family at 5.1 mm pitch, 7 A hold / 11.9 A trip. See README section 9.
-THT['F1'] = ('RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified)','C413552','Extended')
+# Schematic specifies Littelfuse RGEF800 (8 A hold), which is out of stock at
+# JLCPCB in every variant. RGEF1100 is used instead: same family, and the
+# datasheet gives ONE lead spacing of 5.05 mm +-0.75 for the whole RGEF250-1100
+# range, so it drops into the 5.08 mm footprint exactly as the 800 would.
+# Sized UP rather than down because PPTC hold current derates hard with ambient:
+# at 70 C the 800 holds only 5.1 A while the 1100 still holds 6.9 A, against a
+# modelled ~11.3 A average. See README section 9.
+THT['F1'] = ('RGEF1100 PPTC 11A hold / 18.7A trip 5.05mm','C2760131','Extended')
 # Buzzer: MUST be a PASSIVE / externally driven transducer -- the firmware makes
 # the tone by toggling the pin at 2.22 kHz, so an active buzzer with a built-in
 # driver is the wrong device. D12mm, 6.50mm pin pitch (measured).

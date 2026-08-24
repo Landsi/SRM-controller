@@ -9,7 +9,7 @@ M4 400V 1A SMA(DO-214AC),D1,1,C18207,Extended,SMT
 BZX84C24 24V zener SOT-23,"D2,D8",2,C841152,Extended,SMT
 1N4007 1000V 1A DO-41,"D3,D4,D5,D6",4,C106903,Extended,THT
 BZX84C16 16V zener SOT-23,D7,1,C44457,Extended,SMT
-RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified),F1,1,C413552,Extended,THT
+RGEF1100 PPTC 11A hold / 18.7A trip 5.05mm,F1,1,C2760131,Extended,THT
 LM317MDT adj. regulator TO-252,IC4,1,C3015165,Extended,SMT
 Terminal block 4P 3.81mm pluggable,"J1,J3",2,C395697,Extended,THT
 Terminal block 2P 3.81mm pluggable,"J2,J4",2,C395685,Extended,THT
