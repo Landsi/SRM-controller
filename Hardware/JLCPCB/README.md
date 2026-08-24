@@ -207,7 +207,7 @@ parts, so only a handful of feeder setup fees apply.
 | THT | `C395697` | Extended | 2 | Terminal block 4P 3.81mm pluggable |
 | THT | `C395685` | Extended | 2 | Terminal block 2P 3.81mm pluggable |
 | THT | `C252922` | Extended | 1 | Passive transducer 12mm 2.4kHz 6.5mm pitch |
-| THT | `C413552` | Extended | 1 | RGEF700 PPTC 7A hold 5.1mm (RGEF800 specified) |
+| THT | `C2760131` | Extended | 1 | RGEF1100 PPTC 11A hold / 18.7A trip 5.05mm |
 | THT | `C53055674` | Extended | 1 | Pin header 1x4 2.54mm |
 
 Substitutions:
@@ -569,6 +569,40 @@ To repurpose either output now, the only change is the feed: leave R30/R31 at
 
 **The clamp values remain tied to the transistors.** Both are 30 V parts, so both
 clamps are 24 V. Fit a different FET and re-check its clamp.
+
+---
+
+### F1 — RGEF1100, sized up from the schematic's RGEF800
+
+The schematic names the fuse outright: **Littelfuse RGEF800**, 8 A hold. That
+also settles the old "is 10 A hold or interrupt?" question — the KiCad value of
+10 A was simply wrong.
+
+**RGEF800 is out of stock at JLCPCB in all four variants**, so **RGEF1100**
+(`C2760131`) is fitted. The datasheet gives one lead spacing for the whole
+family — *"Lead Spacing (RGEF250 to RGEF1100) — F — 5.05 mm ± 0.75"* — so any
+part in that range drops into the 5.08 mm footprint exactly as the 800 would.
+JLCPCB's catalogue text claims 5.8 mm for the 1100; the datasheet is
+authoritative.
+
+Sized **up** rather than down, because PPTC hold current derates steeply with
+ambient temperature:
+
+| Part | 23 °C | 40 °C | 60 °C | 70 °C | 85 °C |
+|---|---|---|---|---|---|
+| RGEF700 | 7.0 A | 6.2 | 5.0 | 4.4 | 3.3 |
+| RGEF800 *(specified)* | 8.0 A | 6.9 | 5.6 | 5.1 | 3.7 |
+| **RGEF1100** *(fitted)* | **11.0 A** | 9.7 | 7.8 | **6.9** | 5.2 |
+
+Against a modelled ~11.3 A average, even the specified RGEF800 would not hold at
+70 °C. Either the current model is pessimistic — it uses DC resistance and
+ignores back-EMF, so real current falls once the rotor turns — or the controller
+is not meant to sit in engine-bay heat. The designer built and tested this, which
+favours the former.
+
+**Mounting location therefore matters more than the fuse choice.** Keep the board
+out of engine-bay heat where you can, and measure the actual supply current on a
+built board before trusting these figures.
 
 ---
 
