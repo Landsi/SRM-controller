@@ -143,27 +143,35 @@ for r in ('C3','C18'): THT[r] = ('1000uF 16V radial D10x16mm 5mm pitch','C88751'
 for r in ('J1','J3'): THT[r] = ('Terminal block 4P 3.81mm pluggable','C395697','Extended')
 for r in ('J2','J4'): THT[r] = ('Terminal block 2P 3.81mm pluggable','C395685','Extended')
 
-# --- TO-220-DPAK-COMBO: placed as flat SMD (TO-252 / DPAK) -------------------
+# --- TO-220-DPAK-COMBO: placed as flat SMD (TO-263 / D2PAK) ------------------
 # JLCPCB inserts TO-220 packages UPRIGHT, but every one of these positions has a
 # mounting hole 17.78 mm from the pin row, i.e. the package must lie FLAT. The
 # combo footprint's DPAK lands are present in the fabricated copper (verified in
 # art01.pho, 4/4 tab corners on all five), so the parts go down flat as DPAK.
 #
+# The SMD lands are at 2.55 / 2.60 mm spacing -- the TO-220's own 2.54 mm pin
+# pitch, i.e. TO-263 / D2PAK, NOT TO-252 / DPAK's 2.286 mm. Fitting D2PAK gives
+# 0.035 mm lead offset instead of 0.289 mm, and its tab covers 52% of the
+# 9.9 x 14.9 mm thermal pour instead of 22%. D2PAK is simply the surface-mount
+# TO-220: same die, same pinout, same pitch, gullwing leads.
+#
 # Body centre derived from the LEAD lands, not the oversized thermal pour:
 #   lead land centres X = 0.0 / 2.55 / 5.15  -> span centre X = 2.575
 #   outer lead lands end at y = -4.00, body front face just behind at -4.30,
-#   TO-252 body is 6.10 mm long -> centre y = -7.35
-# Cross-check: a DPAK exposed pad starts ~1 mm behind the body front, predicting
-# y = -5.30; the actual thermal land starts at exactly -5.30. Confirmed.
-DPAK_LOCAL = (2.575, -7.350)
-# Leads sit toward local -y = tab-above-leads in the Y-up CPL frame, which is the
-# standard TO-252 0 deg orientation. All five footprints are at rot 0.
+#   TO-263 body is 8.70 mm long -> centre y = -8.65
+# Cross-check: the tab starts ~1 mm behind the body front, predicting y = -5.30;
+# the actual thermal land starts at exactly -5.30. Confirmed.
+DPAK_LOCAL = (2.575, -8.650)
+# Leads sit toward local -y = tab-above-leads in the Y-up CPL frame, the standard
+# TO-263 0 deg orientation. All five footprints are at rot 0.
 DPAK = {
-    'IC4': ('LM317MDT adj. regulator TO-252',            'C3015165','Extended'),
-    'Q2':  ('AOD4184A N-ch 40V 50A 7mR TO-252',          'C99124',  'Extended'),
-    'Q3':  ('AOD4184A N-ch 40V 50A 7mR TO-252',          'C99124',  'Extended'),
-    'Q5':  ('AOD4184A N-ch 40V 50A 7mR TO-252',          'C99124',  'Extended'),
-    'Q4':  ('AOD413A P-ch 40V 30A 32mR TO-252-3L',       'C5371003','Extended'),
+    'IC4': ('LM317D2T adj. regulator TO-263',            'C91673','Extended'),
+    # IRF540NS is the same die as the IRF540N TO-220, so this restores the 100 V
+    # rating of the original RFP40N10 that the 40 V AOD4184A had given away.
+    'Q2':  ('IRF540NS N-ch 100V 33A 44mR D2PAK',         'C23982','Extended'),
+    'Q3':  ('IRF540NS N-ch 100V 33A 44mR D2PAK',         'C23982','Extended'),
+    'Q5':  ('IRF540NS N-ch 100V 33A 44mR D2PAK',         'C23982','Extended'),
+    'Q4':  ('IRF4905S P-ch 55V 70A 20mR D2PAK',          'C2620', 'Extended'),
 }
 
 MANUAL = {}   # nothing left to pick by hand; MOD1 is socketed by the owner

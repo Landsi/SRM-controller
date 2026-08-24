@@ -182,7 +182,7 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C49678` | Basic | 11 | 100nF 50V X7R 0805 |
 | SMT | `C17513` | Basic | 4 | 1kR 125mW 1% 0805 |
 | SMT | `C20917` | Basic | 3 | AO3400A N-ch 30V 5.7A SOT-23 |
-| SMT | `C99124` | Extended | 3 | AOD4184A N-ch 40V 50A 7mR TO-252 |
+| SMT | `C23982` | Extended | 3 | IRF540NS N-ch 100V 33A 44mR D2PAK |
 | SMT | `C17673` | Basic | 3 | 4.7kR 125mW 1% 0805 |
 | SMT | `C282728` | Extended | 2 | 10nF 50V X7R 0805 |
 | SMT | `C841152` | Extended | 2 | BZX84C24 24V zener SOT-23 |
@@ -190,10 +190,10 @@ parts, so only a handful of feeder setup fees apply.
 | SMT | `C106843` | Extended | 1 | 470nF 50V X7R 0805 |
 | SMT | `C18207` | Extended | 1 | M4 400V 1A SMA(DO-214AC) |
 | SMT | `C44457` | Extended | 1 | BZX84C16 16V zener SOT-23 |
-| SMT | `C3015165` | Extended | 1 | LM317MDT adj. regulator TO-252 |
+| SMT | `C91673` | Extended | 1 | LM317D2T adj. regulator TO-263 |
 | SMT | `C73732` | Extended | 1 | Ferrite bead 600R@100MHz 1206 |
 | SMT | `C84256` | Basic | 1 | Red LED 0805 |
-| SMT | `C5371003` | Extended | 1 | AOD413A P-ch 40V 30A 32mR TO-252-3L |
+| SMT | `C2620` | Extended | 1 | IRF4905S P-ch 55V 70A 20mR D2PAK |
 | SMT | `C8545` | Basic | 1 | 2N7002 N-ch 60V 115mA SOT-23 |
 | SMT | `C17714` | Basic | 1 | 47R 125mW 1% 0805 |
 | SMT | `C17572` | Extended | 1 | 240R 125mW 1% 0805 |
@@ -287,11 +287,11 @@ every value in the J6 and J8 input blocks.
 
 ---
 
-## 8. The five combo positions — placed flat as DPAK
+## 8. The five combo positions — placed flat as D2PAK
 
 IC4, Q2, Q3, Q4 and Q5 sit on `TO-220-DPAK-COMBO`, a hybrid land pattern taking
 either a TO-220 through-hole part or a DPAK surface-mount one. **All five are
-placed as DPAK, lying flat.**
+placed as D2PAK (TO-263), lying flat.**
 
 ### Why not TO-220
 
@@ -304,61 +304,70 @@ this plainly, and is worth trusting — it renders what they will actually build
 
 ### The DPAK lands are real
 
-Checked against the fabricated data, **all five DPAK thermal-tab lands are
+Checked against the fabricated data, **all five D2PAK/DPAK thermal-tab lands are
 present in the top copper** (`art01.pho`, 4/4 corners each). The lands survived
 the Altium→KiCad import only as unnamed, netless pads — a KiCad artifact, not a
 board one.
 
+### D2PAK, not DPAK — the lead pitch gives it away
+
+The SMD lands sit at **2.55 and 2.60 mm** spacing. That is the TO-220's own
+**2.54 mm** pin pitch, i.e. **TO-263 / D2PAK** — not TO-252 / DPAK, which is
+2.286 mm. D2PAK is simply the surface-mount TO-220: same die, same pinout, same
+pitch, gullwing leads instead of straight.
+
+| | Pitch | Lead offset on these lands | Tab covers the pour |
+|---|---|---|---|
+| TO-252 / DPAK | 2.286 mm | 0.289 mm | 22 % |
+| **TO-263 / D2PAK** | **2.540 mm** | **0.035 mm** | **52 %** |
+
+Eight times better alignment and more than double the thermal contact. The
+2.1 mm-wide lands corroborate it — D2PAK leads are ~1.27 mm against DPAK's
+0.85 mm.
+
+*This was caught by looking at JLCPCB's own 3D preview: the parts sat visibly
+small in their pads.*
+
 ### Where the body goes — derived, then cross-checked
 
-The thermal pour is 9.9 × 14.9 mm, far larger than the ~6.5 mm package, because
+The thermal pour is 9.9 × 14.9 mm, far larger than any of these packages, because
 it doubles as the bolt-down area for a TO-220 tab. So it is useless as a
-placement reference. The **lead lands** are the reliable datum:
+placement reference. The **lead lands** are the datum:
 
 ```
 lead land centres, footprint-local X = 0.00 / 2.55 / 5.15  ->  span centre 2.575
 outer lead lands end at            y = -4.00
-TO-252 body front face just behind y = -4.30
-body is 6.10 mm long               ->  centre y = -7.35
+body front face just behind        y = -4.30
+TO-263 body is 8.70 mm long        ->  centre y = -8.65
 ```
 
-Independent cross-check: a DPAK's exposed pad starts ~1 mm behind the body front
-face, predicting the thermal land should begin at **y = −5.30**. It begins at
-**exactly −5.30**. The land pattern really was drawn around a true TO-252, so the
-body position is confirmed by geometry rather than assumed.
+Independent cross-check: the tab starts ~1 mm behind the body front, predicting
+the thermal land should begin at **y = −5.30**. It begins at **exactly −5.30**.
 
-Verified after generation — every centroid sits inside its own thermal land, and
-the 6.6 × 6.1 mm body clears the lead lands by 1.8 mm.
+Body then spans X −2.50…7.66 against a −2.40…7.50 pour, so the plastic may
+overhang the copper by ~0.1 mm a side while the 8.4 mm tab sits well inside.
+Neighbours are 15–16 mm apart, leaving ~4.8 mm between bodies.
 
 **Rotation is 0°.** Leads sit toward local −y, i.e. tab-above-leads in the Y-up
-CPL frame, which is the standard TO-252 orientation. All five footprints are at
-rot 0.
+CPL frame, the standard TO-263 orientation. All five footprints are at rot 0.
 
 ### Parts
 
 | Ref | Part | LCSC | Note |
 |---|---|---|---|
-| IC4 | LM317MDT, TO-252 | `C3015165` | supplies ~8 V rail + hall sensors, well under 100 mA |
-| Q2, Q3, Q5 | AOD4184A N-ch, 40 V, 50 A, 7 mΩ | `C99124` | phase switches, ~8.9 A each → ~0.55 W |
-| Q4 | AOD413A P-ch, 40 V, 30 A, 32 mΩ | `C5371003` | motor power switch, carries the lot |
+| IC4 | LM317D2T, TO-263 | `C91673` | ~8 V rail + hall sensors, well under 100 mA |
+| Q2, Q3, Q5 | **IRF540NS**, 100 V, 33 A, 44 mΩ | `C23982` | phase switches |
+| Q4 | **IRF4905S**, 55 V, 70 A, 20 mΩ | `C2620` | motor power switch, carries the lot |
 
-Two things to weigh, neither blocking:
-
-- **Lead pitch is 2.55 / 2.60 mm on these lands, against 2.286 mm on a real
-  TO-252.** The combo footprint compromised toward the TO-220's 2.54 mm holes.
-  Outer leads therefore sit ~0.15–0.3 mm off their land centres — still well
-  inside 2.1 mm-wide lands, but it is not a textbook DPAK pattern.
-- **40 V parts replace 50 V (BUZ11) / 100 V (RFP40N10) originals.** Phase flyback
-  is clamped to the rail by D3–D6, so working V<sub>DS</sub> is ~13–17 V and 40 V
-  is over 2× that. But the 1N4007s are slow rectifiers, so a brief spike before
-  they conduct is plausible. If you want the original margin back, keep Q2/Q3/Q5
-  as bolted TO-220s and hand-fit just those three.
+**IRF540NS is the same die as the IRF540N TO-220**, so moving to D2PAK also
+restores the **100 V** rating of the original RFP40N10 — margin that had been
+given away when 40 V DPAK parts were chosen. Q4 likewise goes from 40 V/30 A to
+**55 V/70 A**. With the freewheel diodes being slow 1N4004s, that transient
+headroom is worth having.
 
 **Q4's part number was separately contested** and this settles it: the PCB value
 `IRF9610` is 1.8 A, hopeless against ~8.9 A, while `ALTIUM_VALUE`, `RATING` (40V)
-and `DETAILS` (SMD) all point at AOD413A. Three fields against one, and the DPAK
-land confirms the package. The 30 A / 32 mΩ variant is specified rather than the
-12 A one, because Q4 sees the full ~18 A peak.
+and `DETAILS` (SMD) all pointed at a surface-mount part.
 
 ---
 
