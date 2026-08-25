@@ -34,7 +34,13 @@ def props(n):
     return {p[1]: p[2] for p in kids(n,'property')
             if len(p)>=3 and isinstance(p[1],str) and isinstance(p[2],str)}
 
-ROT_CORR = {'TO-220-DPAK-COMBO':90, '0805':90, '1206':90, 'LED_0805':90, 'SOT23':180, 'DIO$2F$GF1G':0}
+# LED_0805 is 270, not 90: the other 0805-family corrections are +90 because the
+# imported footprints run pad1->pad2 along Y, but LD1 is polarised and JLCPCB's
+# LED model faces the other way. Netlist: D8 -> R21 -> pad2 -> pad1 -> GND, so
+# pad 1 is the CATHODE; the board's curved silkscreen marks sit on pad 1's side,
+# the standard cathode marking. At +90 JLC's preview put '+' against that mark,
+# i.e. 180 deg out. Confirmed visually, not inferred.
+ROT_CORR = {'TO-220-DPAK-COMBO':90, '0805':90, '1206':90, 'LED_0805':270, 'SOT23':180, 'DIO$2F$GF1G':0}
 
 # ---- part assignment -------------------------------------------------------
 # key: designator -> (comment, LCSC, library, group)

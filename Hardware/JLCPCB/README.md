@@ -127,7 +127,7 @@ The Altium-imported footprints do not follow IPC/JLCPCB orientation:
 |---|---|---|---|
 | `0805` | **+90°** | 42 | pad 1→2 runs along **Y**; IPC standard is along X |
 | `1206` | **+90°** | 2 | same |
-| `LED_0805` | **+90°** | 1 | same |
+| `LED_0805` | **+270°** | 1 | polarised — JLC's LED model faces the other way, see below |
 | `SOT23` | **+180°** | 7 | geometry matches KiCad's standard SOT-23 |
 | `DIO$2F$GF1G` | 0° | 1 | already along X |
 | `TO-220-DPAK-COMBO` | **+90°** | 5 | JLC's TO-263 has leads along Y at 0° — confirmed in their preview |
@@ -142,6 +142,27 @@ board's imported footprints are named plain `0805`.
 The SOT-23 value is not inference — it matches the published JLCPCB table
 (`bennymeg/Fabrication-Toolkit`, `plugins/transformations.csv`:
 `"^SOT-23",180,0,0`).
+
+### LD1 — why its correction differs
+
+The other 0805-family parts get **+90°** because the imported footprints run
+pad 1 → pad 2 along Y. LD1 is polarised, so direction matters, and it needs
+**+270°**.
+
+The board is unambiguous about which end is which:
+
+```
+Nano D8 -> R21 (1k) -> LD1 pad 2 -> [LED] -> LD1 pad 1 -> GND
+```
+
+Current enters at pad 2 and leaves at pad 1, so **pad 2 is the anode and pad 1
+the cathode**. The footprint puts pad 1 at local y −1.016, and both curved
+silkscreen marks — an inner arc at y −0.25…−0.46 and an outer one at
+y −1.80…−2.00 — sit on that same side. **The rounded marking is the cathode
+end**, as convention expects.
+
+At +90° JLCPCB's preview showed its "+" against that curved mark, i.e. the LED
+180° out. Corrected to 270 and confirmed visually.
 
 ### Confirm polarity visually
 
