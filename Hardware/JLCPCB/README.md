@@ -647,3 +647,24 @@ prevent.
 
 Used by the Clio Leaf conversion (`project-clio-leaf`) to drive the ZE1
 gearbox's park-lock actuator.
+
+---
+
+## 13. One-file download
+
+`SRM_JLCPCB_order.zip` bundles exactly what a JLCPCB order needs — the
+unmodified upstream gerber plus the BOM and both CPL variants — as a single
+83 KB file. It exists because iOS blocks blob-URL downloads in in-app browsers,
+so a plain GitHub download is the reliable route on an iPad or iPhone:
+
+<https://github.com/Landsi/SRM-controller/raw/main/Hardware/JLCPCB/SRM_JLCPCB_order.zip>
+
+It is **generated**, so regenerate it whenever the CSVs change:
+
+```bash
+cd Hardware/JLCPCB
+rm -f SRM_JLCPCB_order.zip && mkdir -p /tmp/ozip
+cp ../SRM_gerber.zip SRM_BOM_JLCPCB.csv SRM_CPL_JLCPCB.csv \
+   SRM_CPL_JLCPCB_gerber-origin.csv /tmp/ozip/
+(cd /tmp/ozip && zip -q -X "$OLDPWD/SRM_JLCPCB_order.zip" *) && rm -rf /tmp/ozip
+```
