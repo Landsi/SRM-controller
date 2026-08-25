@@ -147,7 +147,9 @@ for r in ('C3','C18'): THT[r] = ('1000uF 16V radial D10x16mm 5mm pitch','C88751'
 # owner. Note J1 pin 1 and J2 carry ~21 A peak against an 8 A block rating -- the
 # original Phoenix MC 1,5 is rated the same, so this is the design's own limit.
 for r in ('J1','J3'): THT[r] = ('Terminal block 4P 3.81mm pluggable','C395697','Extended')
-for r in ('J2','J4'): THT[r] = ('Terminal block 2P 3.81mm pluggable','C395685','Extended')
+# DB2EVC, matching the 4P part -- NOT DB2EVM (C395685), whose 'M' is the
+# screw-flange variant. Those mounting ears made it foul C17, 6.3 mm from J4.
+for r in ('J2','J4'): THT[r] = ('Terminal block 2P 3.81mm pluggable','C395686','Extended')
 
 # --- TO-220-DPAK-COMBO: placed as flat SMD (TO-263 / D2PAK) ------------------
 # JLCPCB inserts TO-220 packages UPRIGHT, but every one of these positions has a

@@ -226,7 +226,7 @@ parts, so only a handful of feeder setup fees apply.
 | THT | `C106903` | Extended | 4 | 1N4007 1000V 1A DO-41 |
 | THT | `C88751` | Extended | 2 | 1000uF 16V radial D10x16mm 5mm pitch |
 | THT | `C395697` | Extended | 2 | Terminal block 4P 3.81mm pluggable |
-| THT | `C395685` | Extended | 2 | Terminal block 2P 3.81mm pluggable |
+| THT | `C395686` | Extended | 2 | Terminal block 2P 3.81mm pluggable |
 | THT | `C252922` | Extended | 1 | Passive transducer 12mm 2.4kHz 6.5mm pitch |
 | THT | `C2760131` | Extended | 1 | RGEF1100 PPTC 11A hold / 18.7A trip 5.05mm |
 | THT | `C53055674` | Extended | 1 | Pin header 1x4 2.54mm |
@@ -422,7 +422,7 @@ them and that reasoning no longer held:
 | BZ1 | D12 mm, pitch **6.50**, drill 0.8 | passive transducer, 2.4 kHz | `C252922` |
 | C3, C18 | pitch **5.00**, drill 0.9 | 1000 µF 16 V, D10×16 | `C88751` |
 | J1, J3 | 4P, pitch **3.81**, drill 1.22 | DB2EVC-3.81-4P pluggable | `C395697` |
-| J2, J4 | 2P, pitch **3.81**, drill 1.22 | DB2EVM-3.81-2P pluggable | `C395685` |
+| J2, J4 | 2P, pitch **3.81**, drill 1.22 | DB2EVC-3.81-2P pluggable | `C395686` |
 
 Three of those measurements contradicted the schematic text and would have caused
 wrong parts to be bought:
@@ -436,8 +436,12 @@ wrong parts to be bought:
 
 ### Connectors — mating plugs and the Molex question
 
-J1–J4 are **pluggable board-side headers**; the mating plugs are crimped
-separately.
+J1–J4 are **pluggable board-side headers**, all four from the same **DB2EVC**
+series; the mating plugs are crimped separately.
+
+Note the series letter. **DB2EV*M*** (`C395685`) is the screw-flange variant, and
+those mounting ears foul C17, which sits 6.3 mm from J4. **DB2EV*C*** is the plain
+socket and is what fits — `C395686` for 2P, `C395697` for 4P.
 
 **Molex Mini-Fit Jr. does not fit these footprints.** It is 4.20 mm pitch against
 the board's 3.81 mm, and the error accumulates:

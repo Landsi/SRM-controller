@@ -12,7 +12,7 @@ BZX84C16 16V zener SOT-23,D7,1,C44457,Extended,SMT
 RGEF1100 PPTC 11A hold / 18.7A trip 5.05mm,F1,1,C2760131,Extended,THT
 LM317D2T adj. regulator TO-263,IC4,1,C91673,Extended,SMT
 Terminal block 4P 3.81mm pluggable,"J1,J3",2,C395697,Extended,THT
-Terminal block 2P 3.81mm pluggable,"J2,J4",2,C395685,Extended,THT
+Terminal block 2P 3.81mm pluggable,"J2,J4",2,C395686,Extended,THT
 Pin header 1x2 2.54mm,"J5,J6,J7,J8,J9,J10,J11,J12",8,C32713268,Extended,THT
 Pin header 1x4 2.54mm,J13,1,C53055674,Extended,THT
 Ferrite bead 600R@100MHz 1206,L1,1,C73732,Extended,SMT
