@@ -130,7 +130,7 @@ The Altium-imported footprints do not follow IPC/JLCPCB orientation:
 | `LED_0805` | **+90°** | 1 | same |
 | `SOT23` | **+180°** | 7 | geometry matches KiCad's standard SOT-23 |
 | `DIO$2F$GF1G` | 0° | 1 | already along X |
-| `TO-220-DPAK-COMBO` | 0° | 5 | DPAK leads point −y = standard TO-252 |
+| `TO-220-DPAK-COMBO` | **+90°** | 5 | JLC's TO-263 has leads along Y at 0° — confirmed in their preview |
 
 **41 of the 56 SMT parts sit on an 0805/1206-family land pattern.** Exporting
 rotation naively would have placed every resistor and capacitor 90° out —
@@ -348,8 +348,15 @@ Body then spans X −2.50…7.66 against a −2.40…7.50 pour, so the plastic m
 overhang the copper by ~0.1 mm a side while the 8.4 mm tab sits well inside.
 Neighbours are 15–16 mm apart, leaving ~4.8 mm between bodies.
 
-**Rotation is 0°.** Leads sit toward local −y, i.e. tab-above-leads in the Y-up
-CPL frame, the standard TO-263 orientation. All five footprints are at rot 0.
+**Rotation is 90°** — confirmed visually, not inferred. Leads sit toward local
+−y, i.e. tab-above-leads in the Y-up CPL frame, and I had assumed that was
+JLCPCB's 0° TO-263 orientation. Their placement preview showed all five rotated
+90° clockwise, so their library part carries its leads along Y at 0°. The five
+footprints are at KiCad rot 0, so they emit **90**.
+
+This is precisely what the placement-editor check exists to catch: the body
+*position* is geometrically derived and verified, but the *rotation* depends on a
+library convention that cannot be read off the board file.
 
 ### Parts
 

@@ -34,7 +34,7 @@ def props(n):
     return {p[1]: p[2] for p in kids(n,'property')
             if len(p)>=3 and isinstance(p[1],str) and isinstance(p[2],str)}
 
-ROT_CORR = {'TO-220-DPAK-COMBO':0, '0805':90, '1206':90, 'LED_0805':90, 'SOT23':180, 'DIO$2F$GF1G':0}
+ROT_CORR = {'TO-220-DPAK-COMBO':90, '0805':90, '1206':90, 'LED_0805':90, 'SOT23':180, 'DIO$2F$GF1G':0}
 
 # ---- part assignment -------------------------------------------------------
 # key: designator -> (comment, LCSC, library, group)
@@ -162,8 +162,11 @@ for r in ('J2','J4'): THT[r] = ('Terminal block 2P 3.81mm pluggable','C395685','
 # Cross-check: the tab starts ~1 mm behind the body front, predicting y = -5.30;
 # the actual thermal land starts at exactly -5.30. Confirmed.
 DPAK_LOCAL = (2.575, -8.650)
-# Leads sit toward local -y = tab-above-leads in the Y-up CPL frame, the standard
-# TO-263 0 deg orientation. All five footprints are at rot 0.
+# ROTATION: +90 deg. Leads sit toward local -y, i.e. tab-above-leads in the Y-up
+# CPL frame. I had assumed that was JLCPCB's 0 deg TO-263 orientation; their
+# placement preview showed all five rotated 90 deg clockwise, so their library
+# part has its leads along Y at 0 deg. Confirmed visually, not inferred.
+# All five footprints are at KiCad rot 0, so they emit 90.
 DPAK = {
     'IC4': ('LM317D2T adj. regulator TO-263',            'C91673','Extended'),
     # IRF540NS is the same die as the IRF540N TO-220, so this restores the 100 V
