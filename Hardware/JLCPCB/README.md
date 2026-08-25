@@ -228,7 +228,7 @@ parts, so only a handful of feeder setup fees apply.
 | THT | `C395697` | Extended | 2 | Terminal block 4P 3.81mm pluggable |
 | THT | `C395686` | Extended | 2 | Terminal block 2P 3.81mm pluggable |
 | THT | `C252922` | Extended | 1 | Passive transducer 12mm 2.4kHz 6.5mm pitch |
-| THT | `C413552` | Extended | 1 | RGEF700 PPTC 7A hold / 11.9A trip 5.05mm |
+| THT | `C413554` | Extended | 1 | RGEF800 PPTC 8A hold / 13.6A trip 5.05mm (sub: RGEF700 C413552) |
 | THT | `C53055674` | Extended | 1 | Pin header 1x4 2.54mm |
 
 Substitutions:
@@ -613,15 +613,20 @@ clamps are 24 V. Fit a different FET and re-check its clamp.
 
 ---
 
-### F1 — RGEF700, because size is the binding constraint
+### F1 — RGEF800 as designed; size is the binding constraint
 
 The schematic names the fuse outright: **Littelfuse RGEF800**, 8 A hold. That
 also settles the old "is 10 A hold or interrupt?" question — the KiCad value of
 10 A was simply wrong.
 
-**RGEF800 is out of stock at JLCPCB in all four variants**, so **RGEF700**
-(`C413552`) is fitted — the nearest in-stock part, and *smaller* than the 800, so
-it certainly fits.
+The BOM carries **RGEF800** (`C413554`) because it is the **correct** part. All
+four RGEF800 variants showed **0 stock** on 2026-08-25, so JLCPCB's checker will
+flag it at upload and the substitute gets chosen there.
+
+**Substitute one step DOWN, never up:** **RGEF700** (`C413552`, 7 A hold, 506 in
+stock) is smaller than the 800 and certainly fits. It can also be bought from
+Digi-Key, Mouser, Farnell or RS as a genuine RGEF800 and hand-fitted later —
+a single through-hole part.
 
 **Do not size up here.** RGEF body width scales steeply with rating, and F1 sits
 at footprint rotation 90° with its long axis pointing at the board edge, only
@@ -629,14 +634,15 @@ at footprint rotation 90° with its long axis pointing at the board edge, only
 
 | Part | Body width | Reaches | vs the 7.0 mm edge |
 |---|---|---|---|
-| **RGEF700** *(fitted)* | 10.2–11.2 mm | 5.6 mm | fits, **1.4 mm spare** |
-| RGEF800 *(specified)* | 11.7–12.7 mm | 6.3 mm | fits, 0.6 mm spare |
+| RGEF700 *(substitute)* | 10.2–11.2 mm | 5.6 mm | fits, 1.4 mm spare |
+| **RGEF800** *(specified, in BOM)* | 11.7–12.7 mm | 6.3 mm | fits, **0.65 mm spare** |
 | RGEF900 | 13.0–14.0 mm | 7.0 mm | exactly on the edge |
 | RGEF1100 | 16.5–17.5 mm | 8.8 mm | **overhangs by 1.8 mm** |
 
 An RGEF1100 was tried first, on the reasoning below, and JLCPCB's preview showed
-it hanging off the board. That also explains the designer's choice: **RGEF800 is
-about the largest part that fits**, which is why he did not size up either.
+it hanging **1.8 mm off the board**. That also explains the designer's choice:
+**RGEF800 is about the largest part that fits**, which is why he did not size up
+for derating either — he could not.
 
 ### The derating concern is real, but it is a mounting problem
 
@@ -644,8 +650,15 @@ PPTC hold current falls steeply with ambient temperature:
 
 | Part | 23 °C | 40 °C | 60 °C | 70 °C | 85 °C |
 |---|---|---|---|---|---|
-| **RGEF700** | 7.0 A | 6.2 | 5.0 | **4.4** | 3.3 |
-| RGEF800 | 8.0 A | 6.9 | 5.6 | 5.1 | 3.7 |
+| RGEF700 *(substitute)* | 7.0 A | 6.2 | 5.0 | 4.4 | 3.3 |
+| **RGEF800** *(specified)* | 8.0 A | 6.9 | 5.6 | **5.1** | 3.7 |
+
+Neither is likely to nuisance-trip in service, because a PPTC trips on
+accumulated self-heating and the firmware drives a **fixed 1.14 s** — it never
+stalls and holds. At 11.3 A an RGEF700 needs roughly **52 s** to trip at 23 °C
+and ~38 s at 70 °C, so one operation is about **2 %** of the way there. A genuine
+short draws far more than 18 A and trips it in well under a second, which is the
+job it exists for.
 
 Against a modelled ~11.3 A average, nothing that physically fits this footprint
 holds at 70 °C — not even the specified RGEF800. So it cannot be solved by part
