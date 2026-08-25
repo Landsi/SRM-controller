@@ -127,14 +127,17 @@ for r in ('D3','D4','D5','D6'): THT[r] = ('1N4007 1000V 1A DO-41','C106903','Ext
 for r in ('J5','J6','J7','J8','J9','J10','J11','J12'):
     THT[r] = ('Pin header 1x2 2.54mm','C32713268','Extended')
 THT['J13'] = ('Pin header 1x4 2.54mm','C53055674','Extended')
-# Schematic specifies Littelfuse RGEF800 (8 A hold), which is out of stock at
-# JLCPCB in every variant. RGEF1100 is used instead: same family, and the
-# datasheet gives ONE lead spacing of 5.05 mm +-0.75 for the whole RGEF250-1100
-# range, so it drops into the 5.08 mm footprint exactly as the 800 would.
-# Sized UP rather than down because PPTC hold current derates hard with ambient:
-# at 70 C the 800 holds only 5.1 A while the 1100 still holds 6.9 A, against a
-# modelled ~11.3 A average. See README section 9.
-THT['F1'] = ('RGEF1100 PPTC 11A hold / 18.7A trip 5.05mm','C2760131','Extended')
+# Schematic specifies Littelfuse RGEF800 (8 A hold), out of stock at JLCPCB in
+# every variant. RGEF700 is the nearest in-stock part and is SMALLER than the
+# 800, so it certainly fits.
+#
+# Do NOT size up here. RGEF body width scales steeply with rating -- 700 is
+# 10.2-11.2 mm, 800 is 11.7-12.7, 1100 is 16.5-17.5 -- against a footprint whose
+# silkscreen is only 8.64 mm and with J1 just 8.1 mm away centre to centre. An
+# RGEF1100 was tried and fouls J1; it is twice the footprint's length.
+# The ambient-derating concern that motivated sizing up is real but is a
+# MOUNTING problem, not a fuse-selection one. See README section 10.
+THT['F1'] = ('RGEF700 PPTC 7A hold / 11.9A trip 5.05mm','C413552','Extended')
 # Buzzer: MUST be a PASSIVE / externally driven transducer -- the firmware makes
 # the tone by toggling the pin at 2.22 kHz, so an active buzzer with a built-in
 # driver is the wrong device. D12mm, 6.50mm pin pitch (measured).
